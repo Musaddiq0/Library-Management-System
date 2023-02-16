@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="ClientSide.UserInterface">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="11" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="1229" height="800"/>
+    </constraints>
+    <properties>
+      <background color="-16107455"/>
+      <enabled value="false"/>
+      <minimumSize width="600" height="800"/>
+    </properties>
+    <border type="bevel-raised" title="Welcome Please Log in " title-justification="2" title-position="1">
+      <font name="Courier New" size="16"/>
+      <title-color color="-4473925"/>
+      <color color="-4473925"/>
+    </border>
+    <children>
+      <component id="26aab" class="javax.swing.JLabel" binding="loginInstLabel">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Welcome please  enter your student ID and your Name"/>
+        </properties>
+      </component>
+      <component id="14489" class="javax.swing.JTextField" binding="studentIdVal">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="5" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="160" height="-1"/>
+          </grid>
+        </constraints>
+        <properties>
+          <doubleBuffered value="true"/>
+          <editable value="true"/>
+          <enabled value="true"/>
+          <text value=""/>
+          <visible value="true"/>
+        </properties>
+      </component>
+      <vspacer id="72cf7">
+        <constraints>
+          <grid row="9" column="0" row-span="1" col-span="7" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <hspacer id="1d30f">
+        <constraints>
+          <grid row="1" column="6" row-span="8" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </hspacer>
+      <component id="eda6e" class="javax.swing.JLabel" binding="studentIDLabel">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="5" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <labelFor value="14489"/>
+          <text value="Enter Student ID"/>
+        </properties>
+      </component>
+      <component id="3005d" class="javax.swing.JLabel" binding="fnLabel">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="5" vsize-policy="2" hsize-policy="2" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <labelFor value="14489"/>
+          <text value="First Name"/>
+        </properties>
+      </component>
+      <component id="1af88" class="javax.swing.JTextField" binding="fnVal">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="5" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="160" height="-1"/>
+          </grid>
+        </constraints>
+        <properties>
+          <editable value="true"/>
+          <enabled value="true"/>
+          <text value=""/>
+          <visible value="true"/>
+        </properties>
+      </component>
+      <component id="b5cab" class="javax.swing.JLabel" binding="lnLabel">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="5" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <labelFor value="14489"/>
+          <text value="Last Name"/>
+        </properties>
+      </component>
+      <component id="c4536" class="javax.swing.JTextField" binding="lnVal">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="5" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="160" height="-1"/>
+          </grid>
+        </constraints>
+        <properties>
+          <editable value="true"/>
+          <enabled value="true"/>
+          <text value=""/>
+          <visible value="true"/>
+        </properties>
+      </component>
+      <component id="11784" class="javax.swing.JButton" binding="loginButton" default-binding="true">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="login"/>
+        </properties>
+      </component>
+      <component id="aaafd" class="javax.swing.JButton" binding="cancelButton" default-binding="true">
+        <constraints>
+          <grid row="8" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="cancel"/>
+        </properties>
+      </component>
+      <hspacer id="59f5d">
+        <constraints>
+          <grid row="8" column="2" row-span="1" col-span="3" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </hspacer>
+      <hspacer id="e26c7">
+        <constraints>
+          <grid row="1" column="0" row-span="8" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </hspacer>
+      <component id="bd698" class="javax.swing.JLabel" binding="statusLabel">
+        <constraints>
+          <grid row="10" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <background color="-15058879"/>
+          <text value=""/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>
