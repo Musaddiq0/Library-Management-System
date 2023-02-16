@@ -34,10 +34,11 @@ public class BorrowPage extends JFrame{
     private ObjectOutputStream objectOutputStream;
     private ObjectInputStream objectInputStream;
     /**Initial page that runs when the user signs in and clicks on the borrow button from the homePage
-     * @param userSigned this is the user that has signed in to the system*/
-    public BorrowPage (String userSigned){
+     * @param stuName this is the user that has signed in to the system
+     * @param stuID  this is the ID for the logged-in user*/
+    public BorrowPage (String stuName, String stuID){
         reconnectToServer();
-        this.setTitle(userSigned);
+        this.setTitle(stuName);
         viewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -89,10 +90,10 @@ public class BorrowPage extends JFrame{
     }
 
     public boolean sortUserInput(String author, String title){
-        if((!author.isBlank()) && (!title.isBlank())){
-            return true;
+        if(!(author.isBlank()) && !(title.isBlank())){
+            return (author.matches("^[A-Za-z]+")) && (title.matches("^[A-Za-z]+"));
         }
-        else return (author.matches("^[A-Za-z]+")) && (title.matches("^[A-Za-z]+"));
+        return false;
     }
 
     public synchronized void checkForBooks(String author, String title) {

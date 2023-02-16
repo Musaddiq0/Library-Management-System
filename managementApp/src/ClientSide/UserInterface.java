@@ -131,7 +131,7 @@ public class UserInterface  extends JFrame {
 
     /**This method is used to display the homepage when the user's log-in details are correct*/
     private void loginSuccess(){
-        homePage page= new homePage(this.fnVal.getText());
+        homePage page= new homePage(this.fnVal.getText(),this.studentIdVal.getText());
             page.statusLabelHP.setText("Connection to the server established");
         this.setVisible(false);
 

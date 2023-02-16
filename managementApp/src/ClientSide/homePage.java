@@ -28,11 +28,13 @@ public class homePage  extends JFrame{
 //    String statusLabelHPText = statusLabelHP.getText();
 //    UserInterface userInterface = new UserInterface("Library Management App");
     String user;
+    String studentID;
     ObjectOutputStream objectOutputStream ;
     ObjectInputStream objectInputStream;
-    public homePage(String User){
-        super(User);
+    public homePage(String User, String StudentID){
+        super();
         this.user = User;
+        this.studentID = StudentID;
         homepageInitGUI();
         userInformationButton.addActionListener(new ActionListener() {
             @Override
@@ -75,7 +77,7 @@ public class homePage  extends JFrame{
     }
     public void showBorrowPage(){
         this.setVisible(false);
-        BorrowPage borrowPage =new BorrowPage(this.user);
+        BorrowPage borrowPage =new BorrowPage(this.user, this.studentID);
         borrowPage.initBorrowPage();
 
     }
@@ -129,7 +131,7 @@ public class homePage  extends JFrame{
         }
     }
     public static void main (String[] args){
-     homePage page = new homePage("");
+     homePage page = new homePage("","");
 
     }
 }
