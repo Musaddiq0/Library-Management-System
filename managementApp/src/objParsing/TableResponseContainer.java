@@ -7,9 +7,10 @@ import java.util.List;
  * @author Musaddique
  * */
 public class TableResponseContainer implements Serializable {
-    public String[] columns;
+    public List<String> columns;
     public List<List<Object>> data;
     public String status;
+    public int borrowedCode;
 //    public List<String> booksCols;
 
     /**
@@ -25,10 +26,14 @@ public class TableResponseContainer implements Serializable {
 //        this.data = data;
 //    }
 
-    public TableResponseContainer(String[] columns, List<List<Object>> data, String status) {
+    public TableResponseContainer(List<String> columns, List<List<Object>> data, String status) {
         this.columns = columns;
         this.data = data;
         this.status = status;
+
+    }
+    public TableResponseContainer (int borrowedCode){
+        this.borrowedCode = borrowedCode;
     }
 
 //    public TableResponseContainer(List<String> booksCols) {
@@ -38,9 +43,16 @@ public class TableResponseContainer implements Serializable {
     public String getStatus() {
         return status;
     }
+    public int getBorrowedCode(){
+        return borrowedCode;
+    }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public void setBorrowedCode(int borrowedCode) {
+        this.borrowedCode = borrowedCode;
     }
 }
 //    public void setBooksCols(int index, String colname) {

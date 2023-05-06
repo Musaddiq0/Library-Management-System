@@ -2,20 +2,18 @@ package ServerSide;
 
 import objParsing.TableResponseContainer;
 import objParsing.clientMssg;
+import objParsing.serverResponse;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 public class threadHandler implements  Runnable {
 
@@ -24,6 +22,7 @@ public class threadHandler implements  Runnable {
     private final int threadNo;
     ObjectInputStream objectInputStream;
     ObjectOutputStream   objectOutputStream;
+    String[] booksCols = {"ISBN", "Title", "Author", "Quantity"};
 
     public threadHandler(Socket socket) throws IOException {
         this.socket = socket;
@@ -51,6 +50,8 @@ public class threadHandler implements  Runnable {
                 //reading the clients msg and storing the read values
                 System.out.println(objParsing.getCommands());
                 String clientSays = objParsing.getUserInput();
+                serverResponse response = new serverResponse();
+                List <Object>  borrowBooksInfo = objParsing.getBooksSelected();
 
 
                 //checking the commands and performing the actions respectively
@@ -65,7 +66,7 @@ public class threadHandler implements  Runnable {
 //                        preparedStatement.setString(2,loginDetails[1]);
 //                        preparedStatement.setString(3,loginDetails[2]);
                     ArrayList<Integer> sqlresult = new ArrayList<>(); // Array list to store the result from DB for all SQL commands
-                    try(Connection connection = sqlConn.getConnected()){
+                    try(Connection connection = ServerSide.sqlConn.getConnected()){
                         System.out.println("Connected to the DB");
                         //checking if the ID exists on the table
                         PreparedStatement idPreparedStatement = connection.prepareStatement(idSQLCmd);
@@ -105,50 +106,175 @@ public class threadHandler implements  Runnable {
 //                    steps
 //                    1. sort the user inputs the  user input into an array
                     String[]userInput = clientSays.split(":");
-//                    2. create a query to return all the books with that title and author
-                    String returnBooksQuery = "SELECT * FROM Books WHERE Author = ? AND Title = ? ";
-                    try (Connection connection = sqlConn.getConnected()) {
-                        System.out.println("Connected to the DB");
-                        //Pass the title and author in the SQL command to return the lists of book(s) matching the selections
-                        PreparedStatement preparedStatement = connection.prepareStatement(returnBooksQuery);
-                        preparedStatement.setString(1, userInput[0]);
-                        preparedStatement.setString(2, userInput[1]);
-                        //store the query result in a resultset
-                        ResultSet viewBooksResult = preparedStatement.executeQuery();
-                        List<List<Object>> booksResult = new ArrayList<>();
-                        List<Object> tableCols = new ArrayList<>();
-                        while (viewBooksResult.next()) {
-                            tableCols.add(viewBooksResult.getInt(1));
-                            tableCols.add(viewBooksResult.getString(2));
-                            tableCols.add(viewBooksResult.getString(3));
-                            tableCols.add(viewBooksResult.getInt(4));
-                            booksResult.add(tableCols);
+                    String returnBooksQuery =null;
+                    if(Objects.equals(userInput[0], "Title only")){
+                        returnBooksQuery = getTitleSQL();
+//                        establish the connection to the DB
+                        try (Connection connection =  ServerSide.sqlConn.getConnected()) {
+                            System.out.println("connection to DB established");
+//                            pass the query to excute
+                            PreparedStatement preparedStatement = connection.prepareStatement(returnBooksQuery);
+                            preparedStatement.setString(1, userInput[1]);
+//                            store the query results in a ResultSet if any
+                            ResultSet viewBooksResult = preparedStatement.executeQuery();
+//                            setting up the table data structure (rows and columns )
+                            List<List<Object>> booksResult = new ArrayList<>();
+                            List<Object> tableCols = new ArrayList<>();
+                            while (viewBooksResult.next()) {
+                                tableCols.add(viewBooksResult.getInt(1));
+                                tableCols.add(viewBooksResult.getString(2));
+                                tableCols.add(viewBooksResult.getString(3));
+                                tableCols.add(viewBooksResult.getInt(4));
+                                booksResult.add(tableCols);
+                            }
+//                            sending back to the server to display
+                            List<String> cols = new ArrayList<>(Arrays.asList(booksCols));
+                            String SQLstatusUpdate;
+                            if (!booksResult.isEmpty()){
+                                SQLstatusUpdate = "Below are the results of books marching title " +userInput[0];
+                                TableResponseContainer responseContainer = new TableResponseContainer(cols, booksResult, SQLstatusUpdate);
+                                objectOutputStream.writeObject(responseContainer);
+                                System.out.println(cols);
+                            }
+                            else {
+                                SQLstatusUpdate = "No such record, please try a different title and author";
+                                TableResponseContainer responseContainer = new TableResponseContainer(cols, booksResult, SQLstatusUpdate);
+                                responseContainer.setStatus(SQLstatusUpdate);
+                                objectOutputStream.writeObject(responseContainer);
+                                System.out.println(cols);
+                            }
                         }
-//                        List<String> cols = null;
-                        String SQLstatusUpdate;
-                        if (!booksResult.isEmpty()) {
-                            SQLstatusUpdate = "Below are the results of books written by the author " +userInput[0];
-                            TableResponseContainer responseContainer = new TableResponseContainer(booksCols, booksResult, SQLstatusUpdate);
-                            objectOutputStream.writeObject(responseContainer);
-                            System.out.println(Arrays.toString(booksCols));
-                        } else {
-                            SQLstatusUpdate = "No such record, please try a different title and author";
-                            TableResponseContainer responseContainer = new TableResponseContainer(booksCols, booksResult, SQLstatusUpdate);
-                            responseContainer.setStatus(SQLstatusUpdate);
-                            objectOutputStream.writeObject(responseContainer);
-                            System.out.println(Arrays.toString(booksCols));
-                        }
-                        //create a structure to handle the result to be displayed on the table in the GUI
                     }
+                    else if(Objects.equals(userInput[0], "Author only")) {
+                        returnBooksQuery = getAuthorSQL();
+//                        establish the connection to the DB
+                        try (Connection connection =  ServerSide.sqlConn.getConnected()) {
+                            System.out.println("connection to DB established");
+//                            pass the query to excute
+                            PreparedStatement preparedStatement = connection.prepareStatement(returnBooksQuery);
+                            preparedStatement.setString(1, userInput[1]);
+//                            store the query results in a ResultSet if any
+                            ResultSet viewBooksResult = preparedStatement.executeQuery();
+//                            setting up the table data structure (rows and columns )
+                            List<List<Object>> booksResult = new ArrayList<>();
+                            List<Object> tableCols = new ArrayList<>();
+                            while (viewBooksResult.next()) {
+                                tableCols.add(viewBooksResult.getInt(1));
+                                tableCols.add(viewBooksResult.getString(2));
+                                tableCols.add(viewBooksResult.getString(3));
+                                tableCols.add(viewBooksResult.getInt(4));
+                                booksResult.add(tableCols);
+                            }
+//                            sending back to the server to display
+                            List<String> cols = new ArrayList<>(Arrays.asList(booksCols));
+                            String SQLstatusUpdate;
+                            if (!booksResult.isEmpty()){
+                                SQLstatusUpdate = "Below are the results of books marching title " +userInput[1];
+                                TableResponseContainer responseContainer = new TableResponseContainer(cols, booksResult, SQLstatusUpdate);
+                                objectOutputStream.writeObject(responseContainer);
+                                System.out.println(Arrays.toString(booksCols));
+                            }
+                            else {
+                                SQLstatusUpdate = "No such record, please try a different title and author";
+                                TableResponseContainer responseContainer = new TableResponseContainer(cols, booksResult, SQLstatusUpdate);
+                                responseContainer.setStatus(SQLstatusUpdate);
+                                objectOutputStream.writeObject(responseContainer);
+                                System.out.println(Arrays.toString(booksCols));
+                            }
+                        }
+                    }
+                   // todo 2 check for when when any is blank and then create a condition that fits only that
+                    else{
+                        try (Connection connection =  ServerSide.sqlConn.getConnected()) {
+                            returnBooksQuery = getbooksAllSQL();
+                            System.out.println("connection to DB established");
+//                            pass the query to execute
+                            PreparedStatement preparedStatement = connection.prepareStatement(returnBooksQuery);
+                            preparedStatement.setString(1, userInput[1]);
+                            preparedStatement.setString(2,userInput[2]);
+//                            store the query results in a ResultSet if any
+                            ResultSet viewBooksResult = preparedStatement.executeQuery();
+//                            setting up the table data structure (rows and columns )
+                            List<List<Object>> sqlResultsFromDB = new ArrayList<>();
+                            while (viewBooksResult.next()) {
+                                List<Object> tableCols = new ArrayList<>();
+                                tableCols.add(viewBooksResult.getInt(1));
+                                tableCols.add(viewBooksResult.getString(2));
+                                tableCols.add(viewBooksResult.getString(3));
+                                tableCols.add(viewBooksResult.getInt(4));
+                                sqlResultsFromDB.add(tableCols);
+                            }
+//                           sending back to the server to display
+                            List<String> cols = new ArrayList<>(Arrays.asList(booksCols));
+                            String SQLstatusUpdate;
+                            if (!sqlResultsFromDB.isEmpty()){
+                                SQLstatusUpdate = "Below is the result of your search ";
+                                TableResponseContainer responseContainer = new TableResponseContainer(cols, sqlResultsFromDB, SQLstatusUpdate);
+                                objectOutputStream.writeObject(responseContainer);
+                                System.out.println(Arrays.toString(booksCols));
+                            }
+                            else {
+                                SQLstatusUpdate = "No such record, please try a different title and author";
+                                TableResponseContainer responseContainer = new TableResponseContainer(cols, sqlResultsFromDB, SQLstatusUpdate);
+                                responseContainer.setStatus(SQLstatusUpdate);
+                                objectOutputStream.writeObject(responseContainer);
+                                System.out.println(Arrays.toString(booksCols));
+                            }
+                        }
+                    }
+
                 }
                 else if (objParsing.getCommands() == clientMssg.clientCommands.BORROWBOOK) {
                     //Steps
-                    // 1. Get the Object containing the selected rows
-                    Object booksSelected = new ArrayList<>();
-                    booksSelected = objParsing.getBooksSelected();
-                    //2. update the borrows table with the student details and the book borrowed
+                    // 1. Get the input sent from the UI and store for processing
+                    StringBuilder builder = new StringBuilder();
+// concatenating the user input to one string to send to the server
+                    for (Object str : borrowBooksInfo) {
+                        builder.append(String.format("%s:", str));
+                    }
+                    String sortedInput = builder.toString();
+                    if (!sortedInput.isEmpty()) {
+                        sortedInput = sortedInput.substring(0, sortedInput.length() - 1); // Remove the trailing colon
+                    }
+//                    split the sorted client details and store in an array
+                    String[] userInput = sortedInput.split(":");
+                    Date date = objParsing.getReturnDate();
+//                    convert the date to SQL date format
+                    java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+//                  set the SQL query
+                    String sql = "INSERT INTO Borrow (ISBN, Title, Author, ReturnDate, BorrowID, StudentID, FirstName) VALUES (?, ?, ?, ?, ?, ?, ?)";
+//                    Create the SQL connection
+                    try(Connection connect = sqlConn.getConnected()){
+                        System.out.println("connection to DB established");
+                        PreparedStatement preparedStatement = connect.prepareStatement(sql);
+                        preparedStatement.setInt(1, Integer.parseInt(userInput[2].trim()));
+                        preparedStatement.setString(2,userInput[3].trim());
+                        preparedStatement.setString(3, userInput[5].trim());
+                        preparedStatement.setDate(4, (sqlDate));
+                        preparedStatement.setInt(5, Integer.parseInt(userInput[4].trim()));
+                        preparedStatement.setInt(6, Integer.parseInt(userInput[0].trim()));
+                        preparedStatement.setString(7,userInput[1].trim());
+//                        store the query result code
+                        int sqlStatus = preparedStatement.executeUpdate();
+                        String dbResponse = null;
+                        //2. update the borrows table with the student details and the book borrowed
+                        if (sqlStatus >0){
+                            dbResponse = "Please proceed to the counter to collect your book. Enjoy have a great ";
+                            response.setBorrowFlag(sqlStatus);
+                            response.setMssgToDisplay(dbResponse);
+                            objectOutputStream.writeObject(response);
+                            System.out.println(dbResponse);
+                        }
+                        else{
+                            dbResponse = "Something wong !!! try again";
+//                            set the server response parcels to send back to the GUI
+                            response.setBorrowFlag(sqlStatus);
+                            response.setMssgToDisplay(dbResponse);
+                            objectOutputStream.writeObject(response);
+                            System.out.println(dbResponse);
+                        }
+                    }
                     //2a. create the SQL query to insert into the borrow table with the user and books information
-                    String updateBorrowTable = "Insert into borrow where";
                 }
             }
         }catch (IOException ex){
@@ -166,8 +292,63 @@ public class threadHandler implements  Runnable {
 
 
     }
-
-    String[] booksCols = {"ISBN", "Title", "Author", "Quantity"};
+//    public Object []setDBInitailTitleOnly()  {
+//        String sqlQuery = " SELECT * FROM Books WHERE Title = ?";
+//        return new Object[]{sqlQuery,connection};
+//    }
+//
+//    public Object []setDBInitailAuthorOnly() throws SQLException {
+//        String sqlQuery = " SELECT * FROM Books WHERE Author = ?";
+//        Connection connection = ServerSide.sqlConn.getConnected();
+//        return new Object[]{sqlQuery,connection};
+//    }
+//    public Object []setDBInitailATOnly() throws SQLException {
+//        String sqlQuery = " SELECT * FROM Books WHERE Title = ? AND Autor = ?";
+//        Connection connection = ServerSide.sqlConn.getConnected();
+//        return new Object[]{sqlQuery,connection};
+//    }
+    public String getTitleSQL(){
+        return " SELECT * FROM Books WHERE Title = ?";
+    }
+    public String getAuthorSQL(){
+        return " SELECT * FROM Books WHERE Author = ?";
+    }
+    public String getbooksAllSQL(){
+        return " SELECT * FROM Books WHERE Author = ? AND Title = ?";
+    }
     String[] borrowedCol ={"",""};
 
 }
+
+//                    2. create a query to return all the books with that title and author
+//                    try (Connection connection = ServerSide.sqlConn.getConnected()) {
+//                        System.out.println("Connected to the DB");
+//                        //Pass the title and author in the SQL command to return the lists of book(s) matching the selections
+//                        PreparedStatement preparedStatement = connection.prepareStatement(returnBooksQuery);
+//                        preparedStatement.setString(1, userInput[0]);
+//                        preparedStatement.setString(2, userInput[1]);
+//                        //store the query result in a resultset
+//                        ResultSet viewBooksResult = preparedStatement.executeQuery();
+//                        List<List<Object>> booksResult = new ArrayList<>();
+//                        List<Object> tableCols = new ArrayList<>();
+//                        while (viewBooksResult.next()) {
+//                            tableCols.add(viewBooksResult.getInt(1));
+//                            tableCols.add(viewBooksResult.getString(2));
+//                            tableCols.add(viewBooksResult.getString(3));
+//                            tableCols.add(viewBooksResult.getInt(4));
+//                            booksResult.add(tableCols);
+//                        }
+////                        List<String> cols = null;
+//                        String SQLstatusUpdate;
+//                        if (!booksResult.isEmpty()) {
+//                            SQLstatusUpdate = "Below are the results of books written by the author " +userInput[0];
+//                            TableResponseContainer responseContainer = new TableResponseContainer(booksCols, booksResult, SQLstatusUpdate);
+//                            objectOutputStream.writeObject(responseContainer);
+//                            System.out.println(Arrays.toString(booksCols));
+//                        } else {
+//                            SQLstatusUpdate = "No such record, please try a different title and author";
+//                            TableResponseContainer responseContainer = new TableResponseContainer(booksCols, booksResult, SQLstatusUpdate);
+//                            responseContainer.setStatus(SQLstatusUpdate);
+//                            objectOutputStream.writeObject(responseContainer);
+//                            System.out.println(Arrays.toString(booksCols));
+//                        }

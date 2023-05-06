@@ -156,7 +156,7 @@ public class UserInterface  extends JFrame {
         }
     }
 
-    /**This method reconnects the socket and makes connection to the serverk*/
+    /**This method reconnects the socket and makes connection to the server*/
     public void reconnectToServer() {
         endConnection();
         statusLabel.setText("Status: Attempting connection to server");
