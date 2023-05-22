@@ -6,13 +6,13 @@
       <xy x="20" y="20" width="1229" height="800"/>
     </constraints>
     <properties>
-      <background color="-16107455"/>
+      <background color="-10052676"/>
       <enabled value="false"/>
       <minimumSize width="600" height="800"/>
     </properties>
     <border type="bevel-raised" title="Welcome Please Log in " title-justification="2" title-position="1">
       <font name="Courier New" size="16"/>
-      <title-color color="-4473925"/>
+      <title-color color="-16645373"/>
       <color color="-4473925"/>
     </border>
     <children>

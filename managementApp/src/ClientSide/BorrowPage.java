@@ -31,6 +31,8 @@ public class BorrowPage extends JFrame{
     private JLabel welcomeLabelBP;
     private JFormattedTextField returnDate;
     private JLabel dateFormatLabel;
+    private JPanel viewBooksPanel;
+    private JPanel tablePanel;
     private Socket socket;
     private ObjectOutputStream objectOutputStream;
     private ObjectInputStream objectInputStream;
@@ -55,10 +57,8 @@ public class BorrowPage extends JFrame{
                     userinput[1] = titleVal.getText();
 //                    if the first value of the array is empty then its only title the user typed
                     if(userinput[0].isBlank()){
-                        userToServ =  userinput[1];
                         userToServ = String.format("%s:%s", "Title only",userinput[1]);                    }
                     else if (userinput[1].isBlank()){
-                        userToServ = userinput[0] ;
                         userToServ = String.format("%s:%s", "Author only",userinput[0]);
                     }
                     else if(!(userinput[0].isBlank()) && !(userinput[1].isBlank())){
@@ -169,6 +169,8 @@ public class BorrowPage extends JFrame{
      **/
     public synchronized void checkForBooks(String userInput) {
         if (objectInputStream != null && objectOutputStream!=null){
+//            Steps
+//            1. send the data to the server using object streams
             try {
                     objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.VIEWBOOKSUSINGAT, userInput));
                     // TODO: 29/03/2023 check and adjust accordingly to the corresponding section in the thread handler class separating the sending inputs
@@ -176,7 +178,7 @@ public class BorrowPage extends JFrame{
 //                    displaying the input/output exceptions in a label
                     borrowMainStatusLb.setText("IOException " + e);
                 }
-//                Receiving the response from the client to update the GUI Table on the borrow page
+//                2.Receiving the response from the client to update the GUI Table on the borrow page
                 TableResponseContainer responseContainer =null;
                 try {
 //                    reading the response from the server on from the request sent if any

@@ -61,13 +61,20 @@ public class UserInterface  extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //Steps
-                //1. check the user input match what is expected strings and int respectively
+//                1a. Create a student instance to store or destroy unpon validation
+                Student student = new Student(Integer.parseInt(studentIdVal.getText()), fnVal.getText(), lnVal.getText());
+                //1b. check the user input match what is expected strings and int respectively
                if(sortUserInput(lnVal.getText(),fnVal.getText(),studentIdVal.getText())){
-                   loginUser(lnVal.getText(),fnVal.getText(),studentIdVal.getText());
+                   loginUser(student);
                }
                else{
                    reconnectToServer();
                    JOptionPane.showMessageDialog(fnVal, "Please enter a valid login details in the spaces provided!!!");
+//                   try {
+//                       student.destroy();
+//                   } catch (Throwable ex) {
+//                       throw new RuntimeException(ex);
+//                   }
 
                }
                 //2. run the login method with the users inputs collected
@@ -81,14 +88,13 @@ public class UserInterface  extends JFrame {
      * @param studentID content of the studentID textfield
      * @param lastName  content of the lastname textfield
      * @param firstName content of the firstname text-field*/
-    private synchronized void loginUser(String lastName, String firstName, String studentID) {
+    private synchronized void loginUser(Student potentialStudent) {
         if (objectInputStream != null && objectOutputStream != null){
             //Steps
             //1. Convert the studentId to integer
             //2. Prepare and parse the inputs to the outputStream to send to the server
-            String userInput = String.format("%s:%s:%s", studentID, lastName,firstName);
             try{
-                objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.LOGIN, userInput));
+                objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.LOGIN, potentialStudent));
 
             }catch (IOException e){
                 statusLabel.setText("IOException " + e);

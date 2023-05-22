@@ -12,7 +12,7 @@ public class clientMssg implements Serializable {
     //Steps
     // 1. create enum for commands from the client-side
     public enum clientCommands{
-    LOGIN, VIEWBOOKSUSINGAT, BORROWBOOK, FINALIZEBORROW
+    LOGIN, VIEWBOOKSUSINGAT, BORROWBOOK, UserInfoParcel,
     }
 //    public  enum booksCols{
 //        ISBN,Title,Author,Quantity
@@ -23,6 +23,7 @@ public class clientMssg implements Serializable {
     private int loginRst;
     private Date returnDate;
     private List <Object> booksSelected;
+    private Object studParcels;
 //    private final bo
 
 
@@ -59,6 +60,11 @@ public class clientMssg implements Serializable {
 
     }
 
+    public clientMssg (clientCommands commands, Object studParcels){
+        this.commands =commands;
+        this.studParcels =studParcels;
+    }
+
     // 3. setters and getters to update the server and clients about commands
 
 
@@ -85,6 +91,10 @@ public class clientMssg implements Serializable {
         return booksSelected;
     }
 
+    public Object getStudParcels() {
+        return studParcels;
+    }
+
     public int getLoginStatus() {
         return loginRst;
     }
@@ -94,4 +104,5 @@ public class clientMssg implements Serializable {
     public void setLoginStatus(int sqlRst){
         this.loginRst = sqlRst;
     }
+
 }
