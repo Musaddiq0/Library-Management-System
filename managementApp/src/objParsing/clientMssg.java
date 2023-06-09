@@ -12,11 +12,8 @@ public class clientMssg implements Serializable {
     //Steps
     // 1. create enum for commands from the client-side
     public enum clientCommands{
-    LOGIN, VIEWBOOKSUSINGAT, BORROWBOOK, UserInfoParcel,
+    LOGIN, VIEWBOOKSUSINGAT, BORROWBOOK, UserInfoParcel, GETNUMBORROWBOOKS
     }
-//    public  enum booksCols{
-//        ISBN,Title,Author,Quantity
-//    }
     private final clientCommands commands;
     private  String statusMssg;
     private  String userInput;
@@ -38,8 +35,8 @@ public class clientMssg implements Serializable {
 ////        this.booksSelected = books;
 ////    }
     /**
-     * This constructor accepts two parameters, to update the server of the clients command and the user input
-     * @param commands the command from the GUI i.e. button clicked
+     * This constructor accepts two parameters, to update the server of the clients request and the user input from forms
+     * @param commands the request from the GUI i.e. button clicked, or event triggered
      * @param userInput the input the user typed in the text-field provided
      */
     public clientMssg(clientCommands commands, String userInput){
@@ -57,7 +54,6 @@ public class clientMssg implements Serializable {
         this.commands = commands;
         this.booksSelected = selectedBooks;
         this.returnDate = borrowDate;
-
     }
 
     public clientMssg (clientCommands commands, Object studParcels){

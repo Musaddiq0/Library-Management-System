@@ -27,7 +27,7 @@ public class BorrowPage extends JFrame{
     private JButton borrowButton;
     private JPanel bBtnPanel;
     private JLabel borrowMainStatusLb;
-    private JLabel borrowLabelInstr;
+    private JLabel borrowDateLabelInstr;
     private JLabel welcomeLabelBP;
     private JFormattedTextField returnDate;
     private JLabel dateFormatLabel;
@@ -36,37 +36,37 @@ public class BorrowPage extends JFrame{
     private Socket socket;
     private ObjectOutputStream objectOutputStream;
     private ObjectInputStream objectInputStream;
-     String stdID;
-     String stdname;
+     Student student;
     /**Initial page that runs when the user signs in and clicks on the borrow button from the homePage
-     * @param stuName this is the user that has signed in to the system
-     * @param studentID  this is the ID for the logged-in user*/
-    public BorrowPage (String stuName, String studentID){
+     * @param student this is the user that has signed in to the system*/
+    public BorrowPage (Student student){
         super();
         reconnectToServer();
-        this.stdID = studentID;
-        this.stdname = stuName;
-
+        this.student = student;
+        this .setTitle("Welcome to the Library Application" +student.getFirstName());
+//      Button action listeners
         viewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String [] userinput = new String[2];
-                String userToServ = null;
-                if(checkIfNotBlank(authorVal.getText(), titleVal.getText())){
-                    userinput[0] = authorVal.getText();
-                    userinput[1] = titleVal.getText();
-//                    if the first value of the array is empty then its only title the user typed
-                    if(userinput[0].isBlank()){
-                        userToServ = String.format("%s:%s", "Title only",userinput[1]);                    }
-                    else if (userinput[1].isBlank()){
-                        userToServ = String.format("%s:%s", "Author only",userinput[0]);
-                    }
-                    else if(!(userinput[0].isBlank()) && !(userinput[1].isBlank())){
-                        userToServ = String.format("%s:%s:%s","Both",userinput[0],userinput[1]);
-                    }
+                String userInput = null;
+                if(sortUserInputSize(authorVal.getText(),titleVal.getText())){
+//                    if the author text field is empty then its only title the user typed
+                        if(authorVal.getText().isBlank()){
+                            userInput = String.format("%s:%s", "Title only",titleVal.getText());
+                        }
+//                    if the title text field is empty then its only title the user typed
+                        else if (titleVal.getText().isBlank()){
+                            userInput = String.format("%s:%s", "Author only",authorVal.getText());
+                        }
+//                    if the author text field is not empty and the title texfield is also not empty
+                        else if(!(authorVal.getText().isBlank()) && !(titleVal.getText().isBlank())){
+//                        sending author and title
+                            userInput = String.format("%s:%s:%s","Both",authorVal.getText(),titleVal.getText());
+                        }
+//                    pass the concatenated string to the server processing method
+                        checkForBooks(userInput);
 
-                    checkForBooks(userToServ);
-                }else{
+                }else {
                     borrowMainStatusLb.setText("The text field contains some error please check and try again ");
                 }
             }
@@ -75,44 +75,52 @@ public class BorrowPage extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 List <Object> userInput = printSelectedRow((GenericTableModel) booksTable.getModel());
+                boolean checkbit = false;
 //                check if the user selected any entry from the table to make sure we have the data to be sent
                 if(userInput.size()>2){
 //                    extract the  selection of the user from the table (ISBN, Title, Author,Quantity and StudentID)
                     Random rand = new Random();
-
                     // Generate a random number between 0 and 99
                     int randomNumber = rand.nextInt(10000);
                     userInput.add(4,randomNumber);
 //                 get the value of the return date text-field
-                    String userDate = returnDate.getText();
-                    Date date = new Date();
-//                    setting the user date to the format
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd");
+                    String userDate;
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+                    Date date;
                     try {
-                        date = format.parse(userDate);
-                        // Print the date to the console
-                         System.out.println("Parsed date: " + date.toString());
+                        date = simpleDateFormat.parse(returnDate.getText());
+                        checkbit = true;
                     } catch (ParseException ex) {
-                        // If parsing fails, print an error message to the console
-                        System.out.println("Invalid date format");
-                        userDate = "invalid";
+                        borrowMainStatusLb.setText(ex.getMessage()+" please use this format yyyy/MM/dd");
+                        throw new RuntimeException(ex);
                     }
+//
 //                 make sure the return date is not empty
-                 if(!(Objects.equals(userDate, "invalid"))){
+                    // TODO: 08/06/2023 test what happends when the wrong date format is entered
+                 if(checkbit){
 //                     send the user input to the server for processing using the method
                      borrowBook(userInput, date);
                  }
 //                 prompt the user to enter a return date on the status label
                  else{
                      borrowMainStatusLb.setText("Please enter a valid return date using the format yyyy/mm/dd and try again");
-                     borrowLabelInstr.setText("");
+                     borrowDateLabelInstr.setText("");
                  }
                 }
 //                 prompt the user to select a book on the status label
                 else{
                     borrowMainStatusLb.setText("Please select a book from the table to continue");
-                    borrowLabelInstr.setText("");
+                    borrowDateLabelInstr.setText("");
                 }
+            }
+        });
+        homePageButton.addActionListener(new ActionListener() {
+            /**
+             * @param e the event to be processed
+             */
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showHomepage(student);
             }
         });
     }
@@ -147,21 +155,28 @@ public class BorrowPage extends JFrame{
     }
 
     /**this method checks the text fields for title and author are not empty */
-    public boolean sortUserInput(String author, String title){
-        if(!(author.isBlank()) && author.matches("^[A-Za-z]+") ){
-            return true;
-        }
-        else return !(title.isBlank()) && (title.matches("^[A-Za-z]+"));
-    }
+//    public boolean sortUserInput(String author, String title){
+//        return author.matches("^[A-Za-z]+");
+//    }
 
-    public static boolean checkIfNotBlank(String author, String title) {
-        if (!author.isBlank() || !title.isBlank()) {
-            return true;
-        } else {
-            return false;
+    /**This method check to see that at least one of the text-fields on the GUI is contains valid alphabets letters.
+     * **/
+    public static boolean sortUserInputSize(String author, String title) {
+        boolean checkbit = false;
+//        Steps
+//        1. if the title text-field contains text and not numbers
+        if (!author.isBlank()){
+            if(author.matches("^[A-Za-z]+")) {
+                checkbit = true;
+            }
+            return checkbit;
         }
+        else if(!title.isBlank()){
+            checkbit = true;
+            return checkbit;
+        }
+        return checkbit;
     }
-
 
     /**
     *  Checks for the available books that match the users input of either title or author or even both
@@ -195,7 +210,7 @@ public class BorrowPage extends JFrame{
                         borrowMainStatusLb.setText(responseContainer.getStatus());
 //                        set the table model to display the results from the database
                         booksTable.setModel(new GenericTableModel(responseContainer.columns, responseContainer.data));
-                        borrowLabelInstr.setText("Please select the book you want to borrow then click the borrow button");
+                        borrowDateLabelInstr.setText("Please select the book you want to borrow then click the borrow button");
                         bBtnPanel.setVisible(true);
                         bBtnPanel.updateUI();
                         dateFormatLabel.setText("Enter a date (yyyy/MM/dd):");
@@ -240,7 +255,7 @@ public class BorrowPage extends JFrame{
 //                        if(booksTable.getRowSelectionAllowed())
                 }else{
                     borrowMainStatusLb.setText(response.getMssgToDisplay());
-                    borrowLabelInstr.setText("");
+                    borrowDateLabelInstr.setText("");
                     returnDate.setText("");
                     authorVal.setText("");
                     titleVal.setText("");
@@ -255,8 +270,8 @@ public class BorrowPage extends JFrame{
     }
     public List<Object> printSelectedRow(GenericTableModel model) {
         List<Object> mixedValues = new ArrayList<>();
-        mixedValues.add(this.stdID);
-        mixedValues.add(this.stdname);
+        mixedValues.add(student.getStudentID());
+        mixedValues.add(student.getFirstName());
         int selectedRow = booksTable.getSelectedRow();
         if (selectedRow != -1) {
             for (int column = 0; column < model.getColumnCount(); column++) {
@@ -268,6 +283,11 @@ public class BorrowPage extends JFrame{
             return mixedValues;
         }
         return mixedValues;
+    }
+    public void showHomepage (Student signedStudent){
+        homePage homePage = new homePage(signedStudent);
+        this.setVisible(false);
+        homePage.setVisible(true);
     }
 
 
@@ -299,15 +319,24 @@ public class BorrowPage extends JFrame{
             borrowMainStatusLb.setText(ex.toString()); // connection failed
         }
     }
+    /**This gets the data the user entered on the GUI and process the information to send to the server.
+     * @param borrowDate the entered user data in this format yyyy/mm/dd
+     * **/
 
-    public Date getDate() {
-        // Get the user's input from the date field and parse it as a Date object
+    public Date getDate(String borrowDate) {
+//        variable is a Date expected to return a Date
+        Date convertdate = new Date();
+//        create a date format and set the pattern of the date
+        SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd");
+//        convert the string from the GUI to a date in a try/catch block
         try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd");
-            return format.parse(returnDate.getText());
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Invalid date format!");
-            return null;
+            convertdate = format.parse(borrowDate);
+            // Print the date to the console
+            System.out.println("Parsed date: " + convertdate.toString());
+            return convertdate;
+        } catch (ParseException ex) {
+            // If parsing fails, print an error message to the console
+            return convertdate;
         }
     }
 }

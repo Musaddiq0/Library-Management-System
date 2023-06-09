@@ -29,7 +29,7 @@
           <text value=""/>
         </properties>
       </component>
-      <component id="a1787" class="javax.swing.JLabel" binding="borrowLabelInstr">
+      <component id="a1787" class="javax.swing.JLabel" binding="borrowDateLabelInstr">
         <constraints>
           <grid row="15" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -39,22 +39,12 @@
       </component>
       <component id="79b79" class="javax.swing.JButton" binding="homePageButton" default-binding="true">
         <constraints>
-          <grid row="0" column="6" row-span="2" col-span="5" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="2" row-span="2" col-span="9" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="HomePage"/>
         </properties>
       </component>
-      <vspacer id="2dac3">
-        <constraints>
-          <grid row="0" column="1" row-span="2" col-span="5" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </vspacer>
-      <vspacer id="48e7a">
-        <constraints>
-          <grid row="16" column="1" row-span="1" col-span="10" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </vspacer>
       <grid id="e50fa" binding="bBtnPanel" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
@@ -190,13 +180,20 @@
       </grid>
       <component id="48ba6" class="javax.swing.JLabel" binding="welcomeLabelBP">
         <constraints>
-          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="1" row-span="2" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <background color="-3353170"/>
+          <horizontalAlignment value="0"/>
+          <horizontalTextPosition value="0"/>
           <text value="Welcome to the borrow page. You can type in the authors of the book or the title "/>
         </properties>
       </component>
+      <vspacer id="48e7a">
+        <constraints>
+          <grid row="16" column="1" row-span="1" col-span="10" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
     </children>
   </grid>
 </form>

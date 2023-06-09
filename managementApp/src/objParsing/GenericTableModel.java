@@ -1,6 +1,7 @@
 package objParsing;
 
 import javax.swing.table.AbstractTableModel;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GenericTableModel extends AbstractTableModel {
@@ -33,6 +34,11 @@ public class GenericTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         return data.get(rowIndex).get(columnIndex);
+    }
+
+    public void clearTable (){
+        data =new ArrayList<>();
+        fireTableDataChanged();
     }
 }
 

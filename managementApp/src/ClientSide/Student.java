@@ -3,13 +3,17 @@ package ClientSide;
 import java.io.Serializable;
 
 public class Student implements Serializable {
-    private String firstName;
-    private String lastName;
-    private int studentID;
+    private final String firstName;
+    private final String lastName;
+    private final int studentID;
     private  int noBorrowedBooks;
-    private String status;
+    private String sqlStatus;
 
-
+/**This class sole purpose is to get students data from the database table it is  also used to transport information between server and client
+ * @param studentID student ID as it is on the db
+ * @param firstName student firstname as it is on the db
+ * @param lastName  student lastname as it is on the db
+ * **/
     public Student(int studentID,String firstName,String lastName){
         this.firstName = firstName;
         this.lastName = lastName;
@@ -28,8 +32,8 @@ public class Student implements Serializable {
         return lastName;
     }
 
-    public String getStatus() {
-        return status;
+    public String getSqlStatus() {
+        return sqlStatus;
     }
 
     public int getStudentID() {
@@ -40,8 +44,8 @@ public class Student implements Serializable {
         this.noBorrowedBooks = noBorrowedBooks;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setSqlStatus(String sqlStatus) {
+        this.sqlStatus = sqlStatus;
     }
 
 }

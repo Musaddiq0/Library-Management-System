@@ -100,6 +100,7 @@ public class threadHandler implements  Runnable {
                         objParsing.setStatusMssg("User does not exist");
                         objParsing.setLoginStatus(0);
                         objectOutputStream.writeObject(objParsing);
+                        studParcels = null;
                     }
 
                     else{
@@ -252,6 +253,7 @@ public class threadHandler implements  Runnable {
 //                    Create the SQL connection
                     try(Connection connect = sqlConn.getConnected()){
                         System.out.println("connection to DB established");
+//                        update the borrow table on the SQL to reflect the user request
                         PreparedStatement preparedStatement = connect.prepareStatement(sql);
                         preparedStatement.setInt(1, Integer.parseInt(userInput[2].trim()));
                         preparedStatement.setString(2,userInput[3].trim());
@@ -264,13 +266,13 @@ public class threadHandler implements  Runnable {
                         int sqlStatus = preparedStatement.executeUpdate();
                         String dbResponse = null;
                         serverResponse response = new serverResponse();
-                        //2. update the borrows table with the student details and the book borrowed
+                        //2. update the GUI with the results from the action performed with the student details and the book borrowed
                         if (sqlStatus >0){
                             dbResponse = "Please proceed to the counter to collect your book. Enjoy have a great ";
                             response.setBorrowFlag(sqlStatus);
                             response.setMssgToDisplay(dbResponse);
                             objectOutputStream.writeObject(response);
-                            System.out.println(dbResponse);
+                            System.out.println(dbResponse+ " plus students parcel");
                         }
                         else{
                             dbResponse = "Something wong !!! try again";
@@ -302,7 +304,7 @@ public class threadHandler implements  Runnable {
                         String lastname="";
                         int studentID=0;
                         boolean check = false;
-                        serverResponse response = new serverResponse();
+                        serverResponse response =new serverResponse();
                         while(userInforSqlresults.next()){
 //                            List<Object> datafromDB = new ArrayList<>();
                             studentID = (userInforSqlresults.getInt(1));
@@ -317,11 +319,11 @@ public class threadHandler implements  Runnable {
 //                        1. send back the result if positive
                         if(check){
 //                            create a new object of the serverResponse class with the DB result passed in
-                            Student st = new Student(studentID,firstName,lastname);
-                            st.setStatus("got result");
-                            response.setSqlcode("got result");
+                            Student updateStudent = new Student(studentID,firstName,lastname);
+                            updateStudent.setSqlStatus("got result");
+                            response.setSqlcode(updateStudent.getSqlStatus());
                             //sending the result back to the GUI
-                            objectOutputStream.writeObject(st);
+                            objectOutputStream.writeObject(updateStudent);
                         }
 //                        2. else send back the result if negative
                         else {
@@ -334,9 +336,33 @@ public class threadHandler implements  Runnable {
 
 
                     }
-
-
-
+                }
+                else if (objParsing.getCommands() == clientMssg.clientCommands.GETNUMBORROWBOOKS) {
+                    int noBorrowBooks = 0;
+                    boolean checkbit = false;
+//                        the sql code to execute
+                    String dbRequest = " SELECT COUNT(*) AS no_of_borrowed_books FROM Borrow WHERE StudentID = ?; ";
+//                    Set up the SQL connection to process the query
+                    try(Connection connection = sqlConn.getConnected()){
+                        System.out.println("connected to the SQL table");
+                        PreparedStatement preparedStatement = connection.prepareStatement(dbRequest);
+                        preparedStatement.setInt(1,studParcels.getStudentID());
+//                      Execute the sql query and store your result set
+                        ResultSet resultSet = preparedStatement.executeQuery();
+//                        check the content of the Resultset and extract your data.
+                        if(resultSet.next()){
+                            noBorrowBooks = resultSet.getInt("no_of_borrowed_books");
+                            checkbit = true;
+                        }
+                    }
+//                    sending back the data to the client by updating the student object GUI
+                    if (checkbit){
+                        studParcels.setNoBorrowedBooks(noBorrowBooks);
+                        objectOutputStream.writeObject(studParcels);
+                    }
+                    else{
+                        studParcels.setSqlStatus("The user is not registered  in something wong");
+                    }
                 }
             }
         }catch (IOException ex){

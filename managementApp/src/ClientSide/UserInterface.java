@@ -84,15 +84,12 @@ public class UserInterface  extends JFrame {
     }
 
 
-    /**This is the login user methods that checks if it is a valid user or not
-     * @param studentID content of the studentID textfield
-     * @param lastName  content of the lastname textfield
-     * @param firstName content of the firstname text-field*/
+    /**This method accepts the student class as the argument and sends the student data for verification
+     * @param potentialStudent object of the Student class for easy access to  student data*/
     private synchronized void loginUser(Student potentialStudent) {
         if (objectInputStream != null && objectOutputStream != null){
             //Steps
-            //1. Convert the studentId to integer
-            //2. Prepare and parse the inputs to the outputStream to send to the server
+            //1. Prepare and parse the inputs to the outputStream to send to the server (command and studentship)
             try{
                 objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.LOGIN, potentialStudent));
 
@@ -106,10 +103,11 @@ public class UserInterface  extends JFrame {
                 int loginStat = reply.getLoginStatus();
                 if (loginStat==0){
                     JOptionPane.showMessageDialog(mainPanel, "Please enter valid login details and try again!!!");
+                    potentialStudent = null;
                 }
                 else{
                     statusLabel.setText(reply.getStatusMssg());
-                    loginSuccess();
+                    loginSuccess(potentialStudent);
                 }
 
             }catch (IOException e){
@@ -136,8 +134,8 @@ public class UserInterface  extends JFrame {
     }
 
     /**This method is used to display the homepage when the user's log-in details are correct*/
-    private void loginSuccess(){
-        homePage page= new homePage(this.fnVal.getText(),this.studentIdVal.getText());
+    private void loginSuccess(Student curStudent){
+        homePage page= new homePage(curStudent);
             page.statusLabelHP.setText("Connection to the server established");
         this.setVisible(false);
 

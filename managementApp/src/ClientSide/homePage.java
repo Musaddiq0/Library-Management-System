@@ -1,8 +1,4 @@
 package ClientSide;
-
-import objParsing.clientMssg;
-import objParsing.serverResponse;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,37 +20,23 @@ public class homePage  extends JFrame{
     JLabel statusLabelHP;
     private JButton loginPageButton;
     private JPanel homepageButtonsPanel;
-    private JLabel userImgLabel;
     private JPanel userInfoPanel;
-    private JLabel sIDTxtLabel;
-    private JLabel stdfnamelabel;
-    private JLabel stdfnameval;
-    private JLabel stdIDval;
-    private JLabel stdLnamelabel;
-    private JLabel stdLnameval;
-    private JLabel usrInfoLabel;
-    private JLabel userIconVal;
-    private JButton editDetailsButton;
-    private JButton homepageButton;
-    private JPanel iconValPanel;
     //    protected JPanel booksPanel;
 //    protected JPanel categoryPanel;
 //    private JPanel BorrowingPanel;
 //    String statusLabelHPText = statusLabelHP.getText();
 //    UserInterface userInterface = new UserInterface("Library Management App");
-    String user;
-    String studentID;
+    Student student;
     ObjectOutputStream objectOutputStream ;
     ObjectInputStream objectInputStream;
-    public homePage(String User, String StudentID){
+    public homePage(Student curStudent){
         super();
-        this.user = User;
-        this.studentID = StudentID;
+        this.student = curStudent;
         showHomepage();
         userInformationButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showUserInfo();
+                showUsrInforPage(student);
             }
         });
         loginPageButton.addActionListener(new ActionListener() {
@@ -70,14 +52,11 @@ public class homePage  extends JFrame{
             }
         });
     }
-
-
     private Socket socket;
     private void showHomepage() {
         reconnectToServer();
         this.setContentPane(homepageMainPanel);
-        userInfoPanel.setVisible(false);
-        welcomLabel.setText("Welcome to the Library application " +this.user);
+        welcomLabel.setText("Welcome to the Library application " +student.getFirstName());
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setSize(800,800);
         this.setVisible(true);
@@ -87,70 +66,26 @@ public class homePage  extends JFrame{
     }
     public void showBorrowPage(){
         this.setVisible(false);
-        BorrowPage borrowPage =new BorrowPage(this.user, this.studentID);
+        BorrowPage borrowPage =new BorrowPage(student);
         borrowPage.initBorrowPage();
 
     }
-    private void showUserInfo(){
-        if(objectOutputStream != null && objectInputStream!=null){
-            //        steps
-//       1. pass the studentID to the database to find out the details of the user
-            String studentID  = this.studentID;
-            try{
-//                writing to the server
-                objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.UserInfoParcel,studentID));
-                System.out.println("packet sent to server");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-//            creating the parcel to receive the response from the server side
-            Student student = null;
-            serverResponse serverResponse = null;
 
-//            List <Object> studentInfo = new ArrayList<>();
-            try {
-//                receiving the response from the server
-                student = (Student) objectInputStream.readObject();
-                String sqlCode = student.getStatus();
-//                the user details are arranged like this [studentID,FirstName,LastName,Number of borrowed books]
-//                studentInfo = response.getUserInfoParcels();
-//                reading the serve response for the student object
-                if(!sqlCode.isEmpty()){
-                    stdIDval.setText(String.valueOf(student.getStudentID()));
-                    stdfnameval.setText(student.getFirstName());
-                    stdLnameval.setText(student.getLastName());
-                    setupUIHomePage(student.getStatus());
-                }
-//                reading the response for the server response
-                else{
-                    usrInfoLabel.setText(student.getStatus());
-                }
-//                display the panel and update the GUI accordingly
-//                setupUIHomePage(student.getStatus());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-//        steps
-//       1. create a student class object
-
-
+/**This shows the user information page and terminates the present UI.
+ * @param student current logged in student data **/
+    public void showUsrInforPage(Student student){
+        UserInfor userInfor = new UserInfor(student);
+        userInfor.showUsrInfo();
+        userInfor.setVisible(true);
+        this.setVisible(false);
     }
+
     private void loginPageSetUp(){
         UserInterface userInterface = new UserInterface(homePage.super.getTitle());
         userInterface.setVisible(true);
         this.setVisible(false);
     }
 
-    private void setupUIHomePage(String sqlCode){
-        userInfoPanel.setVisible(true);
-        homepageButtonsPanel.setVisible(false);
-        usrInfoLabel.setText(sqlCode);
-        ImageIcon userIcon = new ImageIcon("profile-icon.jpeg");
-        userImgLabel.setIcon(userIcon);
-        homepageMainPanel.updateUI();
-    }
 
 
     private void endConnection() {
@@ -181,7 +116,7 @@ public class homePage  extends JFrame{
         }
     }
     public static void main (String[] args){
-     homePage page = new homePage("","");
+     homePage page = new homePage(new Student(0,"",""));
 
     }
 }
