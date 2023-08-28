@@ -213,7 +213,7 @@ public class BorrowPage extends JFrame{
                         bBtnPanel.updateUI();
                         dateFormatLabel.setText("Enter a date (yyyy/MM/dd):");
                     }
-                    booksTable.setModel(new GenericTableModel(responseContainer.columns, responseContainer.data));
+//                    booksTable.setModel(new GenericTableModel(responseContainer.columns, responseContainer.data));
                 } catch (IOException e) {
                     borrowMainStatusLb.setText("IOException " + e);
                 } catch (ClassNotFoundException e) {

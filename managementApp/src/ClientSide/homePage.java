@@ -1,4 +1,5 @@
 package ClientSide;
+import objParsing.GenericTableModel;
 import objParsing.TableResponseContainer;
 import objParsing.clientMssg;
 import objParsing.serverResponse;
@@ -11,7 +12,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,7 +31,7 @@ public class homePage  extends JFrame{
     private JButton homePageButton;
     private JButton returnButton;
     private JPanel ReturnPanel;
-    private JTable borrowedBooks;
+    private JTable borrowedBooksTable;
     private JFormattedTextField returnDateVal;
     private JPanel userInfoPanel;
     //    protected JPanel booksPanel;
@@ -82,7 +82,7 @@ public class homePage  extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 ReturnPanel.setVisible(false);
-                homepageButtonsPanel.setVisible(false);
+                homepageButtonsPanel.setVisible(true);
 
 
             }
@@ -98,9 +98,19 @@ public class homePage  extends JFrame{
                 throw new RuntimeException(e);
             }
 //            reading the server reply to display on the table.
-            TableResponseContainer tableResponseContainer;
+            TableResponseContainer responseContainer = null;
+
             try{
-                tableResponseContainer = (TableResponseContainer)objectInputStream.readObject();
+                responseContainer = (TableResponseContainer)objectInputStream.readObject();
+                if(responseContainer.getBorrowedCode() != 1){
+                    statusLabelHP.setText(responseContainer.getStatus());
+//                        set the table model to display the results from the database
+                    borrowedBooksTable.setModel(new GenericTableModel(responseContainer.columns, responseContainer.data));
+                    ReturnPanel.updateUI();
+                }
+                else{
+                    statusLabelHP.setText(responseContainer.getStatus());
+                }
             }catch (IOException e ){
                 statusLabelHP.setText("IOE exception occurred" + e);
             } catch (ClassNotFoundException e) {

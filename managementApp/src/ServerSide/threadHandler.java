@@ -24,6 +24,7 @@ public class threadHandler implements  Runnable {
     ObjectInputStream objectInputStream;
     ObjectOutputStream   objectOutputStream;
     String[] booksCols = {"ISBN", "Title", "Author", "Quantity"};
+    String[] BorroweMenuTablecols = {"ISBN", "Title", "Author"};
 
     public threadHandler(Socket socket) throws IOException {
         this.socket = socket;
@@ -385,18 +386,33 @@ public class threadHandler implements  Runnable {
 //                  1b. search and collect the details of the books a student has borrowed
                     try(Connection connection = sqlConn.getConnected()){
                         System.out.println("Connected to the SQL database");
-                        String SQLquery = "SELECT Borrow.Author, Borrow.Title, Borrow.ISBN FROM Borrow INNER JOIN Users ON Borrow.StudentID = Users.StudentID WHERE Borrow.StudentID = ?";
+                        String SQLquery = "SELECT Borrow.ISBN, Borrow.Title, Borrow.Author FROM Borrow INNER JOIN Users ON Borrow.StudentID = Users.StudentID WHERE Borrow.StudentID = ?";
 //                        1c. process the query
                         PreparedStatement preparedStatement = connection.prepareStatement(SQLquery);
                         preparedStatement.setInt(1,ID);
                         ResultSet borrowedBookList = preparedStatement.executeQuery();
-//                        setting up the table structure
+//                        2a. setting up the table structure
                         List<List<Object>> tabledata = new ArrayList<>();
                         List<Object> columns = new ArrayList<>();
                         while (borrowedBookList.next()){
-                            columns.add(borrowedBookList.getString(1));
+                            columns.add(borrowedBookList.getInt(1));
                             columns.add(borrowedBookList.getString(2));
-                            columns.add(borrowedBookList.getInt(3));
+                            columns.add(borrowedBookList.getString(3));
+                            tabledata.add(columns);
+                        }
+                        List<String>cols = new ArrayList<>(Arrays.asList(BorroweMenuTablecols));
+//                       2b. Writing back to the Client
+                        if(!tabledata.isEmpty()){
+                            String stats = "Contains Borrowed Books";
+                            TableResponseContainer responseContainer = new TableResponseContainer(cols, tabledata,stats);
+                            responseContainer.setBorrowedCode(0);
+                            objectOutputStream.writeObject(responseContainer);
+                        }
+                        else{
+                            int stats = 1;
+                            TableResponseContainer responseContainer = new TableResponseContainer(stats);
+                            responseContainer.setStatus("Contains no Borrowed Books");
+                            objectOutputStream.writeObject(responseContainer);
                         }
 
 
