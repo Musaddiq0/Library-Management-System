@@ -12,7 +12,7 @@ public class clientMssg implements Serializable {
     //Steps
     // 1. create enum for commands from the client-side
     public enum clientCommands{
-    LOGIN, VIEWBOOKSUSINGAT, BORROWBOOK, UserInfoParcel, GETNUMBORROWBOOKS
+    LOGIN, CHECKFORBOOKUSERINPUT, BORROWBOOK, UserInfoParcel, GETNUMBORROWBOOKS, RETURNBOOK, BORROWEDBOOKSMENUINFO
     }
     private final clientCommands commands;
     private  String statusMssg;
@@ -42,6 +42,11 @@ public class clientMssg implements Serializable {
     public clientMssg(clientCommands commands, String userInput){
         this.commands = commands;
         this.userInput = userInput;
+    }
+    public clientMssg (clientCommands commands, Object studParcels, String userInput){
+        this.commands =commands;
+        this.studParcels =studParcels;
+        this.userInput =userInput;
     }
 
 //    public clientMssg(clientCommands commands, Object booksInfo, String date){

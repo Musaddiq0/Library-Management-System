@@ -1,4 +1,8 @@
 package ClientSide;
+import objParsing.TableResponseContainer;
+import objParsing.clientMssg;
+import objParsing.serverResponse;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,6 +11,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +25,14 @@ public class homePage  extends JFrame{
     JLabel statusLabelHP;
     private JButton loginPageButton;
     private JPanel homepageButtonsPanel;
+    private JButton returnBookMenuButton;
+    private JTextField borrowIDtxt;
+    private JTextField bookTitleVal;
+    private JButton homePageButton;
+    private JButton returnButton;
+    private JPanel ReturnPanel;
+    private JTable borrowedBooks;
+    private JFormattedTextField returnDateVal;
     private JPanel userInfoPanel;
     //    protected JPanel booksPanel;
 //    protected JPanel categoryPanel;
@@ -33,29 +46,98 @@ public class homePage  extends JFrame{
         super();
         this.student = curStudent;
         showHomepage();
-        userInformationButton.addActionListener(new ActionListener() {
+        userInformationButton.addActionListener(e -> showUsrInforPage(student));
+        loginPageButton.addActionListener(e -> loginPageSetUp());
+        borrowPageButton.addActionListener(e -> showBorrowPage());
+        returnBookMenuButton.addActionListener(new ActionListener() {
+            /**
+             * @param e the event to be processed
+             */
             @Override
             public void actionPerformed(ActionEvent e) {
-                showUsrInforPage(student);
+                ReturnPanel.setVisible(true);
+                homepageButtonsPanel.setVisible(false);
+                showBorrowedBooks(student);
             }
         });
-        loginPageButton.addActionListener(new ActionListener() {
+        returnButton.addActionListener(new ActionListener() {
+            /**
+             * @param e the event to be processed
+             */
             @Override
             public void actionPerformed(ActionEvent e) {
-                loginPageSetUp();
+                if (!bookTitleVal.getText().isEmpty()){
+                    returnBook(curStudent,bookTitleVal.getText());
+                }
+                else {
+                    statusLabelHP.setText("Please check and make your you have the filled in the right details");
+                }
+
             }
         });
-        borrowPageButton.addActionListener(new ActionListener() {
+        homePageButton.addActionListener(new ActionListener() {
+            /**
+             * @param e the event to be processed
+             */
             @Override
             public void actionPerformed(ActionEvent e) {
-                showBorrowPage();
+                ReturnPanel.setVisible(false);
+                homepageButtonsPanel.setVisible(false);
+
+
             }
         });
     }
+
+    private void showBorrowedBooks(Student student) {
+        if(objectInputStream != null && objectOutputStream!=null){
+//            sending the user details to get details of books borrowed if any
+            try{
+                objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.BORROWEDBOOKSMENUINFO, student));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+//            reading the server reply to display on the table.
+            TableResponseContainer tableResponseContainer;
+            try{
+                tableResponseContainer = (TableResponseContainer)objectInputStream.readObject();
+            }catch (IOException e ){
+                statusLabelHP.setText("IOE exception occurred" + e);
+            } catch (ClassNotFoundException e) {
+                statusLabelHP.setText("ClassNotFoundException occurred" + e);
+            }
+
+        }
+    }
+
+    private synchronized void returnBook(Student student, String bookTitle) {
+        if(objectInputStream != null && objectOutputStream!= null){
+//Steps
+//            1.  send data to the server to update the DB (Student object and the book title)
+            try{
+                objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.RETURNBOOK, student, bookTitle));
+            } catch (IOException e) {
+                throw new RuntimeException("IOException " +e);
+            }
+//            2. read the reply from the server
+            serverResponse response =null;
+            try {
+                response= (serverResponse) objectInputStream.readObject();
+
+            }catch (ClassNotFoundException e) {
+                statusLabelHP.setText("Class not found exception " +e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+    }
+
     private Socket socket;
     private void showHomepage() {
         reconnectToServer();
         this.setContentPane(homepageMainPanel);
+        ReturnPanel.setVisible(false);
         welcomLabel.setText("Welcome to the Library application " +student.getFirstName());
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setSize(800,800);
@@ -85,6 +167,34 @@ public class homePage  extends JFrame{
         userInterface.setVisible(true);
         this.setVisible(false);
     }
+
+    /**This method is used to gather the user input and make sure that the user has entered something in the text-field provided
+     * i.e. it returns an list containing the data entered by the user**/
+//    public List<Object> validUserInput (){
+////        Steps
+////        1. collect the text-field data entered by the user and create list to return colected values
+//        List<Object> UserInput = new ArrayList<>();
+////        1a.borrowID and bookTitle
+//        String borrowID = borrowIDtxt.getText();
+//        String booktitle = bookTitleVal.getText();
+////        1b. returndate
+//        Date date;
+//        try {
+//            date = rawdate.parse(returnDateVal.getText());
+//        } catch (ParseException ex) {
+//            statusLabelHP.setText(ex.getMessage()+" please use this format yyyy/MM/dd");
+//            throw new RuntimeException(ex);
+//        }
+//        if (!borrowID.isBlank() && !booktitle.isBlank() && !date.toString().isBlank()){
+//            UserInput.add(borrowID);
+//            UserInput.add(booktitle);
+//            UserInput.add(date);
+//            return UserInput;
+//        }
+//        else {
+//            return UserInput;
+//        }
+//    }
 
 
 

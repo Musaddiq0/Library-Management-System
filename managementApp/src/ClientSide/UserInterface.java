@@ -61,12 +61,14 @@ public class UserInterface  extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //Steps
-//                1a. Create a student instance to store or destroy unpon validation
-                Student student = new Student(Integer.parseInt(studentIdVal.getText()), fnVal.getText(), lnVal.getText());
-                //1b. check the user input match what is expected strings and int respectively
-               if(sortUserInput(lnVal.getText(),fnVal.getText(),studentIdVal.getText())){
-                   loginUser(student);
-               }
+//                1a. Collect and validate  the users input
+                if(sortUserInput(lnVal.getText(), fnVal.getText(), studentIdVal.getText())){
+//                    Create a student instance to store or destroy upon validation
+                    Student student = new Student(Integer.parseInt(studentIdVal.getText()), fnVal.getText(), lnVal.getText());
+                    //1b. check the user input match what is expected strings and int respectively
+                    loginUser(student);
+                }
+
                else{
                    reconnectToServer();
                    JOptionPane.showMessageDialog(fnVal, "Please enter a valid login details in the spaces provided!!!");
@@ -82,7 +84,6 @@ public class UserInterface  extends JFrame {
             }
         });
     }
-
 
     /**This method accepts the student class as the argument and sends the student data for verification
      * @param potentialStudent object of the Student class for easy access to  student data*/

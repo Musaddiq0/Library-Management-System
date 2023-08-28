@@ -23,7 +23,7 @@ public class UserInfor extends JFrame{
     private JButton homePageBt;
     private JLabel borrowedBooksVal;
     Student signStudent;
-
+  // Variables used for the server and client communication
     Socket socket;
     ObjectInputStream objectInputStream;
     ObjectOutputStream objectOutputStream;
@@ -35,7 +35,6 @@ public class UserInfor extends JFrame{
         super();
         this.signStudent = student;
         showUsrInfo();
-
         homePageBt.addActionListener(new ActionListener() {
             /**
              * @param e the event to be processed
@@ -84,7 +83,7 @@ public class UserInfor extends JFrame{
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-//        3. read the reply from the user to update the GUI to display information properly]
+//        3. read the reply from the user to update the GUI to display information properly
             try {
                 signStudent = (Student) objectInputStream.readObject();
                 borrowedBooksCount = String.valueOf(signStudent.getNoBorrowedBooks());

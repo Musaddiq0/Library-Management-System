@@ -94,9 +94,7 @@ public class BorrowPage extends JFrame{
                         borrowMainStatusLb.setText(ex.getMessage()+" please use this format yyyy/MM/dd");
                         throw new RuntimeException(ex);
                     }
-//
 //                 make sure the return date is not empty
-                    // TODO: 08/06/2023 test what happends when the wrong date format is entered
                  if(checkbit){
 //                     send the user input to the server for processing using the method
                      borrowBook(userInput, date);
@@ -159,7 +157,7 @@ public class BorrowPage extends JFrame{
 //        return author.matches("^[A-Za-z]+");
 //    }
 
-    /**This method check to see that at least one of the text-fields on the GUI is contains valid alphabets letters.
+    /**This method check to see that at least one of the text-fields on the GUI  contains only valid alphabets letters.
      * **/
     public static boolean sortUserInputSize(String author, String title) {
         boolean checkbit = false;
@@ -187,7 +185,7 @@ public class BorrowPage extends JFrame{
 //            Steps
 //            1. send the data to the server using object streams
             try {
-                    objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.VIEWBOOKSUSINGAT, userInput));
+                    objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.CHECKFORBOOKUSERINPUT, userInput));
                     // TODO: 29/03/2023 check and adjust accordingly to the corresponding section in the thread handler class separating the sending inputs
                 } catch (IOException e) {
 //                    displaying the input/output exceptions in a label
@@ -225,7 +223,10 @@ public class BorrowPage extends JFrame{
             borrowMainStatusLb.setText("Connection to server not established !!!");
         }
     }
-
+   /**
+    * This Method is responsible for handling the users request for borrowing a book selecting the book and entering the return date
+    * @param userInput this is used to pass the users input (i.e the input required to for borrowing the book)to the server
+    * @param date the  data for borrowing**/
     public void borrowBook(List<Object> userInput, Date date){
 //        Steps
 //        1a. sort out the user input (i.e. the books information and the date of  return)
@@ -268,6 +269,8 @@ public class BorrowPage extends JFrame{
             }
         }
     }
+    /**This method is responsible for arranging the input from the table (i.e. the books selected by the user)
+     * @param model table model used to extract the row selected**/
     public List<Object> printSelectedRow(GenericTableModel model) {
         List<Object> mixedValues = new ArrayList<>();
         mixedValues.add(student.getStudentID());
@@ -284,6 +287,7 @@ public class BorrowPage extends JFrame{
         }
         return mixedValues;
     }
+
     public void showHomepage (Student signedStudent){
         homePage homePage = new homePage(signedStudent);
         this.setVisible(false);

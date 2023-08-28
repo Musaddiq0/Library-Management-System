@@ -100,7 +100,6 @@ public class threadHandler implements  Runnable {
                         objParsing.setStatusMssg("User does not exist");
                         objParsing.setLoginStatus(0);
                         objectOutputStream.writeObject(objParsing);
-                        studParcels = null;
                     }
 
                     else{
@@ -109,7 +108,7 @@ public class threadHandler implements  Runnable {
                         objectOutputStream.writeObject(objParsing);
                     }
                 }
-                else if(objParsing.getCommands() == clientMssg.clientCommands.VIEWBOOKSUSINGAT){
+                else if(objParsing.getCommands() == clientMssg.clientCommands.CHECKFORBOOKUSERINPUT){
 //                    steps
 //                    1. sort the user inputs the  user input into an array
                     String[]userInput = clientSays.split(":");
@@ -255,13 +254,13 @@ public class threadHandler implements  Runnable {
                         System.out.println("connection to DB established");
 //                        update the borrow table on the SQL to reflect the user request
                         PreparedStatement preparedStatement = connect.prepareStatement(sql);
-                        preparedStatement.setInt(1, Integer.parseInt(userInput[2].trim()));
-                        preparedStatement.setString(2,userInput[3].trim());
-                        preparedStatement.setString(3, userInput[5].trim());
-                        preparedStatement.setDate(4, (sqlDate));
-                        preparedStatement.setInt(5, Integer.parseInt(userInput[4].trim()));
-                        preparedStatement.setInt(6, Integer.parseInt(userInput[0].trim()));
-                        preparedStatement.setString(7,userInput[1].trim());
+                        preparedStatement.setInt(1, Integer.parseInt(userInput[2].trim())); //ISBN
+                        preparedStatement.setString(2,userInput[3].trim());  //Title
+                        preparedStatement.setString(3, userInput[5].trim()); //Author
+                        preparedStatement.setDate(4, (sqlDate)); //ReturnDate
+                        preparedStatement.setInt(5, Integer.parseInt(userInput[4].trim())); //BorrowID,
+                        preparedStatement.setInt(6, Integer.parseInt(userInput[0].trim())); //StudentID
+                        preparedStatement.setString(7,userInput[1].trim()); //Firstname
 //                        store the query result code
                         int sqlStatus = preparedStatement.executeUpdate();
                         String dbResponse = null;
@@ -273,6 +272,21 @@ public class threadHandler implements  Runnable {
                             response.setMssgToDisplay(dbResponse);
                             objectOutputStream.writeObject(response);
                             System.out.println(dbResponse+ " plus students parcel");
+////                            update the count of the available book
+////                            reduce the count by 1 after every borrow
+//                            String updateBooksCount = "SELECT Quantity FROM Books WHERE ISBN =?";
+//
+//                             preparedStatement = connect.prepareStatement(updateBooksCount);
+//                             preparedStatement.setInt(1,Integer.parseInt(userInput[2].trim()));
+//                             ResultSet resultSet = preparedStatement.executeQuery();
+//                             int dbBookCount = resultSet.getInt(1);
+//                             if(dbBookCount != 0 ){
+//                                 dbBookCount =-1;
+//
+//                                 String updateCount = " "
+//                             }
+
+
                         }
                         else{
                             dbResponse = "Something wong !!! try again";
@@ -285,58 +299,58 @@ public class threadHandler implements  Runnable {
                     }
                     //2a. create the SQL query to insert into the borrow table with the user and books information
                 }
-                else  if(objParsing.getCommands() == clientMssg.clientCommands.UserInfoParcel){
-//                    steps
-//                    1. Reading the parcel
-                    // convert to an integer to send to server.
-                    int stdIDint = Integer.parseInt(clientSays);
-//                    open connection to the SQL to receive show the user info
-                    try(Connection connect = sqlConn.getConnected()){
-                        System.out.println("connection to DB established");
-//                        prepare and parse the ID
-                        String sqlQuery = "Select * FROM  Users WHERE studentID = ?";
-                        PreparedStatement preparedStatement = connect.prepareStatement(sqlQuery);
-                        preparedStatement.setInt(1,stdIDint);
-//                        query result in a resultset
-                        ResultSet userInforSqlresults = preparedStatement.executeQuery();
-//                        List<Object> userInfoDetails = new ArrayList<>();
-                        String firstName="";
-                        String lastname="";
-                        int studentID=0;
-                        boolean check = false;
-                        serverResponse response =new serverResponse();
-                        while(userInforSqlresults.next()){
-//                            List<Object> datafromDB = new ArrayList<>();
-                            studentID = (userInforSqlresults.getInt(1));
-                            firstName =(userInforSqlresults.getString(2));
-                            lastname= (userInforSqlresults.getString(3));
-//                            userInfoDetails.add(datafromDB);
-//                            Student student = new Student(firstName,lastname,studentID);
-                            response.setSqlcode("Got result");
-                            check = true;
-                        }
-//                        Steps
-//                        1. send back the result if positive
-                        if(check){
-//                            create a new object of the serverResponse class with the DB result passed in
-                            Student updateStudent = new Student(studentID,firstName,lastname);
-                            updateStudent.setSqlStatus("got result");
-                            response.setSqlcode(updateStudent.getSqlStatus());
-                            //sending the result back to the GUI
-                            objectOutputStream.writeObject(updateStudent);
-                        }
-//                        2. else send back the result if negative
-                        else {
-                            response.setSqlcode("No result");
-                            //sending the result back to the GUI
-                           objectOutputStream.writeObject(response);
-                        }
-
-
-
-
-                    }
-                }
+//                else  if(objParsing.getCommands() == clientMssg.clientCommands.UserInfoParcel){
+////                    steps
+////                    1. Reading the parcel
+//                    // convert to an integer to send to server.
+//                    int stdIDint = Integer.parseInt(clientSays);
+////                    open connection to the SQL to receive show the user info
+//                    try(Connection connect = sqlConn.getConnected()){
+//                        System.out.println("connection to DB established");
+////                        prepare and parse the ID
+//                        String sqlQuery = "Select * FROM  Users WHERE studentID = ?";
+//                        PreparedStatement preparedStatement = connect.prepareStatement(sqlQuery);
+//                        preparedStatement.setInt(1,stdIDint);
+////                        query result in a resultset
+//                        ResultSet userInforSqlresults = preparedStatement.executeQuery();
+////                        List<Object> userInfoDetails = new ArrayList<>();
+//                        String firstName="";
+//                        String lastname="";
+//                        int studentID=0;
+//                        boolean check = false;
+//                        serverResponse response =new serverResponse();
+//                        while(userInforSqlresults.next()){
+////                            List<Object> datafromDB = new ArrayList<>();
+//                            studentID = (userInforSqlresults.getInt(1));
+//                            firstName =(userInforSqlresults.getString(2));
+//                            lastname= (userInforSqlresults.getString(3));
+////                            userInfoDetails.add(datafromDB);
+////                            Student student = new Student(firstName,lastname,studentID);
+//                            response.setSqlcode("Got result");
+//                            check = true;
+//                        }
+////                        Steps
+////                        1. send back the result if positive
+//                        if(check){
+////                            create a new object of the serverResponse class with the DB result passed in
+//                            Student updateStudent = new Student(studentID,firstName,lastname);
+//                            updateStudent.setSqlStatus("got result");
+//                            response.setSqlcode(updateStudent.getSqlStatus());
+//                            //sending the result back to the GUI
+//                            objectOutputStream.writeObject(updateStudent);
+//                        }
+////                        2. else send back the result if negative
+//                        else {
+//                            response.setSqlcode("No result");
+//                            //sending the result back to the GUI
+//                           objectOutputStream.writeObject(response);
+//                        }
+//
+//
+//
+//
+//                    }
+//                }
                 else if (objParsing.getCommands() == clientMssg.clientCommands.GETNUMBORROWBOOKS) {
                     int noBorrowBooks = 0;
                     boolean checkbit = false;
@@ -363,6 +377,32 @@ public class threadHandler implements  Runnable {
                     else{
                         studParcels.setSqlStatus("The user is not registered  in something wong");
                     }
+                }
+                else if (objParsing.getCommands() == clientMssg.clientCommands.BORROWEDBOOKSMENUINFO){
+//                    steps
+//                    1a.collect the user details
+                   int ID =  studParcels.getStudentID();
+//                  1b. search and collect the details of the books a student has borrowed
+                    try(Connection connection = sqlConn.getConnected()){
+                        System.out.println("Connected to the SQL database");
+                        String SQLquery = "SELECT Borrow.Author, Borrow.Title, Borrow.ISBN FROM Borrow INNER JOIN Users ON Borrow.StudentID = Users.StudentID WHERE Borrow.StudentID = ?";
+//                        1c. process the query
+                        PreparedStatement preparedStatement = connection.prepareStatement(SQLquery);
+                        preparedStatement.setInt(1,ID);
+                        ResultSet borrowedBookList = preparedStatement.executeQuery();
+//                        setting up the table structure
+                        List<List<Object>> tabledata = new ArrayList<>();
+                        List<Object> columns = new ArrayList<>();
+                        while (borrowedBookList.next()){
+                            columns.add(borrowedBookList.getString(1));
+                            columns.add(borrowedBookList.getString(2));
+                            columns.add(borrowedBookList.getInt(3));
+                        }
+
+
+
+                    }
+
                 }
             }
         }catch (IOException ex){
