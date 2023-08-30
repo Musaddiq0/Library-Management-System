@@ -4,6 +4,7 @@ import ClientSide.Student;
 import objParsing.TableResponseContainer;
 import objParsing.clientMssg;
 import objParsing.serverResponse;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -55,7 +56,6 @@ public class threadHandler implements  Runnable {
                 String clientSays = objParsing.getUserInput();
                 studParcels = (Student) objParsing.getStudParcels();
                 List <Object>  borrowBooksInfo = objParsing.getBooksSelected();
-
 
                 //checking the commands and performing the actions respectively
                 if(objParsing.getCommands() == clientMssg.clientCommands.LOGIN){
@@ -234,34 +234,25 @@ public class threadHandler implements  Runnable {
                 else if (objParsing.getCommands() == clientMssg.clientCommands.BORROWBOOK) {
                     //Steps
                     // 1. Get the input sent from the UI and store for processing
-                    StringBuilder builder = new StringBuilder();
-// concatenating the user input to one string to send to the server
-                    for (Object str : borrowBooksInfo) {
-                        builder.append(String.format("%s:", str));
-                    }
-                    String sortedInput = builder.toString();
-                    if (!sortedInput.isEmpty()) {
-                        sortedInput = sortedInput.substring(0, sortedInput.length() - 1); // Remove the trailing colon
-                    }
+                    String sortedInput = getString(borrowBooksInfo);
 //                    split the sorted client details and store in an array
                     String[] userInput = sortedInput.split(":");
                     Date date = objParsing.getReturnDate();
 //                    convert the date to SQL date format
                     java.sql.Date sqlDate = new java.sql.Date(date.getTime());
 //                  set the SQL query
-                    String sql = "INSERT INTO Borrow (ISBN, Title, Author, ReturnDate, BorrowID, StudentID, FirstName) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    String sql = "INSERT INTO Borrow (BorrowID, Title, Author, ReturnDate,ISBN, StudentID) VALUES (?, ?, ?, ?, ?, ?)";
 //                    Create the SQL connection
                     try(Connection connect = sqlConn.getConnected()){
                         System.out.println("connection to DB established");
 //                        update the borrow table on the SQL to reflect the user request
                         PreparedStatement preparedStatement = connect.prepareStatement(sql);
-                        preparedStatement.setInt(1, Integer.parseInt(userInput[2].trim())); //ISBN
-                        preparedStatement.setString(2,userInput[3].trim());  //Title
-                        preparedStatement.setString(3, userInput[5].trim()); //Author
+                        preparedStatement.setInt(1, Integer.parseInt(userInput[4].trim())); //BorrowID
+                        preparedStatement.setString(2,userInput[2].trim());  //Title
+                        preparedStatement.setString(3, userInput[3].trim()); //Author
                         preparedStatement.setDate(4, (sqlDate)); //ReturnDate
-                        preparedStatement.setInt(5, Integer.parseInt(userInput[4].trim())); //BorrowID,
+                        preparedStatement.setInt(5, Integer.parseInt(userInput[1].trim())); //ISBN,
                         preparedStatement.setInt(6, Integer.parseInt(userInput[0].trim())); //StudentID
-                        preparedStatement.setString(7,userInput[1].trim()); //Firstname
 //                        store the query result code
                         int sqlStatus = preparedStatement.executeUpdate();
                         String dbResponse = null;
@@ -393,8 +384,9 @@ public class threadHandler implements  Runnable {
                         ResultSet borrowedBookList = preparedStatement.executeQuery();
 //                        2a. setting up the table structure
                         List<List<Object>> tabledata = new ArrayList<>();
-                        List<Object> columns = new ArrayList<>();
                         while (borrowedBookList.next()){
+//                            store the data before
+                            List<Object> columns = new ArrayList<>();
                             columns.add(borrowedBookList.getInt(1));
                             columns.add(borrowedBookList.getString(2));
                             columns.add(borrowedBookList.getString(3));
@@ -420,6 +412,19 @@ public class threadHandler implements  Runnable {
                     }
 
                 }
+//                else if (objParsing.getCommands() == clientMssg.clientCommands.RETURNBOOK) {
+////                    steps
+////                    1. Gather user input to process
+//                    String sortedInput = getString(borrowBooksInfo);
+////                    split the sorted client details and store in an array
+//                    String[] userInput = sortedInput.split(":");
+////                    2. update the books and borrow table respectively
+////                    a. updating the books table
+//                    String currentQuantiyQuery = "";
+//
+//
+//
+//                }
             }
         }catch (IOException ex){
             Logger.getLogger(threadHandler.class.getName()).log(Level.SEVERE,null,ex);
@@ -436,7 +441,22 @@ public class threadHandler implements  Runnable {
 
 
     }
-//    public Object []setDBInitailTitleOnly()  {
+
+    @NotNull
+    private static String getString(List<Object> borrowBooksInfo) {
+        StringBuilder builder = new StringBuilder();
+// concatenating the user input to one string to send to the server
+        for (Object str : borrowBooksInfo) {
+            builder.append(String.format("%s:", str));
+        }
+        String sortedInput = builder.toString();
+        if (!sortedInput.isEmpty()) {
+            sortedInput = sortedInput.substring(0, sortedInput.length() - 1); // Remove the trailing colon
+        }
+        return sortedInput;
+    }
+
+    //    public Object []setDBInitailTitleOnly()  {
 //        String sqlQuery = " SELECT * FROM Books WHERE Title = ?";
 //        return new Object[]{sqlQuery,connection};
 //    }

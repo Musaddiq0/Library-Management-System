@@ -24,7 +24,7 @@
           <text value="Welcome please  enter your student ID and your Name"/>
         </properties>
       </component>
-      <component id="14489" class="javax.swing.JTextField" binding="studentIdVal">
+      <component id="14489" class="javax.swing.JTextField" binding="studentIdVal" custom-create="true">
         <constraints>
           <grid row="3" column="1" row-span="1" col-span="5" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="160" height="-1"/>

@@ -48,12 +48,12 @@ public class clientMssg implements Serializable {
         this.studParcels =studParcels;
         this.userInput =userInput;
     }
-
-//    public clientMssg(clientCommands commands, Object booksInfo, String date){
-//        this.commands = commands;
-//        this.booksSelected =booksInfo;
-//        this.userInput = date;
-//    }
+/**This constructor takes in the command and a list of objects**/
+    public clientMssg(clientCommands commands, Object studParcels, List<Object> booksSelected){
+        this.commands = commands;
+        this.booksSelected = booksSelected;
+        this.studParcels = studParcels;
+    }
 
     public clientMssg(clientCommands commands, List <Object>  selectedBooks, Date borrowDate){
         this.commands = commands;

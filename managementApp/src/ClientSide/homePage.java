@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,6 +44,7 @@ public class homePage  extends JFrame{
     Student student;
     ObjectOutputStream objectOutputStream ;
     ObjectInputStream objectInputStream;
+    GenericTableModel tableModel;
     public homePage(Student curStudent){
         super();
         this.student = curStudent;
@@ -67,7 +70,7 @@ public class homePage  extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!bookTitleVal.getText().isEmpty()){
-                    returnBook(curStudent,bookTitleVal.getText());
+                    returnBook(curStudent, borrowedBooksTable);
                 }
                 else {
                     statusLabelHP.setText("Please check and make your you have the filled in the right details");
@@ -81,6 +84,7 @@ public class homePage  extends JFrame{
              */
             @Override
             public void actionPerformed(ActionEvent e) {
+                ReturnPanel.updateUI();
                 ReturnPanel.setVisible(false);
                 homepageButtonsPanel.setVisible(true);
 
@@ -120,12 +124,13 @@ public class homePage  extends JFrame{
         }
     }
 
-    private synchronized void returnBook(Student student, String bookTitle) {
+    private synchronized void returnBook(Student student, JTable borrowedBooksTable) {
         if(objectInputStream != null && objectOutputStream!= null){
 //Steps
-//            1.  send data to the server to update the DB (Student object and the book title)
+//            1.  collect the users selection from the table
+            List<Object> userinput = collectTableSelection(tableModel, borrowedBooksTable);
             try{
-                objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.RETURNBOOK, student, bookTitle));
+                objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.RETURNBOOK, student, userinput));
             } catch (IOException e) {
                 throw new RuntimeException("IOException " +e);
             }
@@ -141,6 +146,20 @@ public class homePage  extends JFrame{
             }
 
         }
+    }
+    /**This method is returns a list of a row selected on a table
+     * @param model this is the model of the table, note it is a generic tabel model type  **/
+    @org.jetbrains.annotations.NotNull
+    private List<Object> collectTableSelection(GenericTableModel model, JTable Table){
+        List<Object> selection = new ArrayList<>();
+        int userSelectionItem = Table.getSelectedRow();
+        if (userSelectionItem != -1) {
+            for (int column = 0; column < model.getColumnCount(); column++) {
+                Object value = model.getValueAt(userSelectionItem, column);
+                selection.add(value);
+            }
+        }
+        return selection;
     }
 
     private Socket socket;

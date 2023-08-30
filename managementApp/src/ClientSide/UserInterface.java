@@ -4,6 +4,10 @@ import objParsing.actionClass;
 import objParsing.clientMssg;
 
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -38,14 +42,14 @@ public class UserInterface  extends JFrame {
     private Socket socket;
 
 /**
- * this method makes sure that the user has entered the expected inputs in the text fields provided
+ * this method performs a input validation check on the input passed
  * @param studentID this is the users ID read from the textfield provided
  * @param firstName this is the users first name read from the textfield provided
  * @param lastName  this is the users lastname read from the textfield provided*/
     public boolean sortUserInput(String lastName, String firstName, String studentID){
         //Steps
         //1. Check and confirm the text fields are not empty or contain garbage
-        return (firstName.matches("^[A-Za-z]+")) && !(firstName.isBlank()) && (lastName.matches("^[A-Za-z]+")) && !(lastName.isBlank()) && (!(studentID.matches("^[A-Za-z]+")) && (studentID.length() == 10) && !(studentID.isBlank()));
+        return ((firstName.matches("^[A-Za-z]+")) && !(firstName.isBlank())) && ((lastName.matches("^[A-Za-z]+")) && !(lastName.isBlank())) && ((!(studentID.matches("^[A-Za-z]+")) && (studentID.length() == 10) && !(studentID.isBlank())));
 
         }
 
@@ -61,10 +65,16 @@ public class UserInterface  extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //Steps
+                try{
+
+                }catch (NumberFormatException numberFormatException){
+
+                }
 //                1a. Collect and validate  the users input
-                if(sortUserInput(lnVal.getText(), fnVal.getText(), studentIdVal.getText())){
+                if(sortUserInput(lnVal.getText().trim(), fnVal.getText().trim(), studentIdVal.getText().trim())){
 //                    Create a student instance to store or destroy upon validation
-                    Student student = new Student(Integer.parseInt(studentIdVal.getText()), fnVal.getText(), lnVal.getText());
+                    int studentID = Integer.parseInt(studentIdVal.getText().trim());
+                    Student student = new Student(studentID, fnVal.getText(), lnVal.getText());
                     //1b. check the user input match what is expected strings and int respectively
                     loginUser(student);
                 }
@@ -123,7 +133,7 @@ public class UserInterface  extends JFrame {
             statusLabel.setText("Connection to the server not established");
         }
     }
-    /**This method drwas the login page GUI*/
+    /**This method draws the inital login page GUI*/
     private void initGUI() {
         this.setContentPane(mainPanel);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -134,7 +144,8 @@ public class UserInterface  extends JFrame {
         });
     }
 
-    /**This method is used to display the homepage when the user's log-in details are correct*/
+    /**This method is used to display the homepage when the user's log-in details are correct
+     * @param curStudent this uses the student class object of the signed in student*/
     private void loginSuccess(Student curStudent){
         homePage page= new homePage(curStudent);
             page.statusLabelHP.setText("Connection to the server established");
@@ -179,5 +190,27 @@ public class UserInterface  extends JFrame {
 
     public static void main(String[] args) {
         UserInterface first = new UserInterface("Library Management App");
+    }
+
+
+
+    private static boolean isNumeric(String str) {
+        return str.matches("\\d+");
+    }
+
+    private void createUIComponents() {
+        studentIdVal = new JTextField(15);
+        AbstractDocument document = (AbstractDocument) studentIdVal.getDocument();
+        document.setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                String currentText = fb.getDocument().getText(0, fb.getDocument().getLength());
+                currentText += text;
+
+                if (isNumeric(text) && currentText.length() <= 10) {
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            }
+        });
     }
 }

@@ -74,13 +74,13 @@ public class BorrowPage extends JFrame{
         borrowButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List <Object> userInput = printSelectedRow((GenericTableModel) booksTable.getModel());
+                List <Object> userInput = printSelectedRow((GenericTableModel) booksTable.getModel(), booksTable);
                 boolean checkbit = false;
 //                check if the user selected any entry from the table to make sure we have the data to be sent
-                if(userInput.size()>2){
+                if(userInput.size()>1){
 //                    extract the  selection of the user from the table (ISBN, Title, Author,Quantity and StudentID)
                     Random rand = new Random();
-                    // Generate a random number between 0 and 99
+                    // Generate a random number between 0 and 9999
                     int randomNumber = rand.nextInt(10000);
                     userInput.add(4,randomNumber);
 //                 get the value of the return date text-field
@@ -271,11 +271,10 @@ public class BorrowPage extends JFrame{
     }
     /**This method is responsible for arranging the input from the table (i.e. the books selected by the user)
      * @param model table model used to extract the row selected**/
-    public List<Object> printSelectedRow(GenericTableModel model) {
+    public List<Object> printSelectedRow(GenericTableModel model, JTable Table) {
         List<Object> mixedValues = new ArrayList<>();
         mixedValues.add(student.getStudentID());
-        mixedValues.add(student.getFirstName());
-        int selectedRow = booksTable.getSelectedRow();
+        int selectedRow = Table.getSelectedRow();
         if (selectedRow != -1) {
             for (int column = 0; column < model.getColumnCount(); column++) {
                 Object value = model.getValueAt(selectedRow, column);
@@ -293,7 +292,6 @@ public class BorrowPage extends JFrame{
         this.setVisible(false);
         homePage.setVisible(true);
     }
-
 
     private void endConnection() {
         if(socket != null){
