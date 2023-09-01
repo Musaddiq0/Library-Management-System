@@ -41,9 +41,7 @@ public class UserInfor extends JFrame{
              */
             @Override
             public void actionPerformed(ActionEvent e) {
-                homePage homePage = new homePage(student);
-                homePage.setVisible(true);
-                mainPanel.setVisible(false);
+                showHomepage(signStudent);
 
             }
         });
@@ -171,6 +169,11 @@ public class UserInfor extends JFrame{
                 socket = null;
             }
         }
+    }
+    public void showHomepage (Student signedStudent){
+        homePage homePage = new homePage(signedStudent);
+        this.setVisible(false);
+        homePage.setVisible(true);
     }
 //    showing the user Pic section.
 //    private void setupUIHomePage(String sqlCode){

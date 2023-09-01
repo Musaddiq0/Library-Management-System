@@ -43,13 +43,12 @@ public class UserInterface  extends JFrame {
 
 /**
  * this method performs a input validation check on the input passed
- * @param studentID this is the users ID read from the textfield provided
  * @param firstName this is the users first name read from the textfield provided
  * @param lastName  this is the users lastname read from the textfield provided*/
-    public boolean sortUserInput(String lastName, String firstName, String studentID){
+    public boolean sortUserInput(String lastName, String firstName){
         //Steps
         //1. Check and confirm the text fields are not empty or contain garbage
-        return ((firstName.matches("^[A-Za-z]+")) && !(firstName.isBlank())) && ((lastName.matches("^[A-Za-z]+")) && !(lastName.isBlank())) && ((!(studentID.matches("^[A-Za-z]+")) && (studentID.length() == 10) && !(studentID.isBlank())));
+        return ((firstName.matches("^[A-Za-z]+")) && !(firstName.isBlank())) && ((lastName.matches("^[A-Za-z]+")) && !(lastName.isBlank()));
 
         }
 
@@ -64,21 +63,20 @@ public class UserInterface  extends JFrame {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //Steps
-                try{
-
-                }catch (NumberFormatException numberFormatException){
-
-                }
+//                //Cautionary Steps to handle exceptions
+//                try{
+//
+//                }catch (NumberFormatException){
+//
+//                }
 //                1a. Collect and validate  the users input
-                if(sortUserInput(lnVal.getText().trim(), fnVal.getText().trim(), studentIdVal.getText().trim())){
+                if(sortUserInput(lnVal.getText().trim(), fnVal.getText().trim())){
 //                    Create a student instance to store or destroy upon validation
                     int studentID = Integer.parseInt(studentIdVal.getText().trim());
                     Student student = new Student(studentID, fnVal.getText(), lnVal.getText());
                     //1b. check the user input match what is expected strings and int respectively
                     loginUser(student);
                 }
-
                else{
                    reconnectToServer();
                    JOptionPane.showMessageDialog(fnVal, "Please enter a valid login details in the spaces provided!!!");

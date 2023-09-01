@@ -69,11 +69,12 @@ public class homePage  extends JFrame{
              */
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!bookTitleVal.getText().isEmpty()){
+                if (borrowedBooksTable.getSelectedRow() !=-1){
+                    tableModel = (GenericTableModel) borrowedBooksTable.getModel();
                     returnBook(curStudent, borrowedBooksTable);
                 }
                 else {
-                    statusLabelHP.setText("Please check and make your you have the filled in the right details");
+                    statusLabelHP.setText("Please check and make sure you have selected a book from the table");
                 }
 
             }
@@ -131,8 +132,8 @@ public class homePage  extends JFrame{
             List<Object> userinput = collectTableSelection(tableModel, borrowedBooksTable);
             try{
                 objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.RETURNBOOK, student, userinput));
-            } catch (IOException e) {
-                throw new RuntimeException("IOException " +e);
+            } catch (IOException |RuntimeException e) {
+                statusLabelHP.setText(e.getLocalizedMessage());
             }
 //            2. read the reply from the server
             serverResponse response =null;

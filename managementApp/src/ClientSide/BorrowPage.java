@@ -52,19 +52,19 @@ public class BorrowPage extends JFrame{
                 if(sortUserInputSize(authorVal.getText(),titleVal.getText())){
 //                    if the author text field is empty then its only title the user typed
                         if(authorVal.getText().isBlank()){
-                            userInput = String.format("%s:%s", "Title only",titleVal.getText());
+                            userInput = String.format("%s$%s", "Title only",titleVal.getText());
                         }
 //                    if the title text field is empty then its only title the user typed
                         else if (titleVal.getText().isBlank()){
-                            userInput = String.format("%s:%s", "Author only",authorVal.getText());
+                            userInput = String.format("%s$%s", "Author only",authorVal.getText());
                         }
 //                    if the author text field is not empty and the title texfield is also not empty
                         else if(!(authorVal.getText().isBlank()) && !(titleVal.getText().isBlank())){
 //                        sending author and title
-                            userInput = String.format("%s:%s:%s","Both",authorVal.getText(),titleVal.getText());
+                            userInput = String.format("%s$%s$%s","Both",authorVal.getText(),titleVal.getText());
                         }
 //                    pass the concatenated string to the server processing method
-                        checkForBooks(userInput);
+                        ViewBooksActions(userInput);
 
                 }else {
                     borrowMainStatusLb.setText("The text field contains some error please check and try again ");
@@ -84,7 +84,6 @@ public class BorrowPage extends JFrame{
                     int randomNumber = rand.nextInt(10000);
                     userInput.add(4,randomNumber);
 //                 get the value of the return date text-field
-                    String userDate;
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
                     Date date;
                     try {
@@ -162,11 +161,9 @@ public class BorrowPage extends JFrame{
     public static boolean sortUserInputSize(String author, String title) {
         boolean checkbit = false;
 //        Steps
-//        1. if the title text-field contains text and not numbers
+//        1. if the title text-field contains text and not numbers becasue books titles could be numbers like 1984
         if (!author.isBlank()){
-            if(author.matches("^[A-Za-z]+")) {
-                checkbit = true;
-            }
+            checkbit = true;
             return checkbit;
         }
         else if(!title.isBlank()){
@@ -180,7 +177,7 @@ public class BorrowPage extends JFrame{
     *  Checks for the available books that match the users input of either title or author or even both
      *  @param userInput this is used to pass the user input from the text field provided
      **/
-    public synchronized void checkForBooks(String userInput) {
+    public synchronized void ViewBooksActions(String userInput) {
         if (objectInputStream != null && objectOutputStream!=null){
 //            Steps
 //            1. send the data to the server using object streams
@@ -223,6 +220,7 @@ public class BorrowPage extends JFrame{
             borrowMainStatusLb.setText("Connection to server not established !!!");
         }
     }
+
    /**
     * This Method is responsible for handling the users request for borrowing a book selecting the book and entering the return date
     * @param userInput this is used to pass the users input (i.e the input required to for borrowing the book)to the server
@@ -243,7 +241,7 @@ public class BorrowPage extends JFrame{
                 serverResponse response = null;
             try{
                 response = (serverResponse) objectInputStream.readObject();
-                int sqlResultStat = response.getBorrowFlag();
+                int sqlResultStat = response.getServerResponseFlag();
                 if(sqlResultStat<=0){
 //                        if there is no record from the database for that book requested by the user
                     borrowMainStatusLb.setText(response.getMssgToDisplay());
