@@ -251,7 +251,7 @@ public class BorrowPage extends JFrame {
                 borrowMainStatusLb.setText("IOException " + e);
             }
             // 2 recieve respond from serverside to display
-            serverResponse response = null;
+            serverResponse response ;
             try {
                 response = (serverResponse) objectInputStream.readObject();
                 int sqlResultStat = response.getServerResponseFlag();
@@ -344,22 +344,22 @@ public class BorrowPage extends JFrame {
      * @param borrowDate the entered user data in this format yyyy/mm/dd
      **/
 
-    public Date getDate(String borrowDate) {
-//        variable is a Date expected to return a Date
-        Date convertdate = new Date();
-//        create a date format and set the pattern of the date
-        SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd");
-//        convert the string from the GUI to a date in a try/catch block
-        try {
-            convertdate = format.parse(borrowDate);
-            // Print the date to the console
-            System.out.println("Parsed date: " + convertdate.toString());
-            return convertdate;
-        } catch (ParseException ex) {
-            // If parsing fails, print an error message to the console
-            return convertdate;
-        }
-    }
+//    public Date getDate(String borrowDate) {
+////        variable is a Date expected to return a Date
+//        Date convertdate = new Date();
+////        create a date format and set the pattern of the date
+//        SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd");
+////        convert the string from the GUI to a date in a try/catch block
+//        try {
+//            convertdate = format.parse(borrowDate);
+//            // Print the date to the console
+//            System.out.println("Parsed date: " + convertdate.toString());
+//            return convertdate;
+//        } catch (ParseException ex) {
+//            // If parsing fails, print an error message to the console
+//            return convertdate;
+//        }
+//    }
 
 }
 
