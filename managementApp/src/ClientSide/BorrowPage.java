@@ -195,7 +195,6 @@ public class BorrowPage extends JFrame {
 //            1. send the data to the server using object streams
             try {
                 objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.CHECKFORBOOKUSERINPUT, userInput));
-                // TODO: 29/03/2023 check and adjust accordingly to the corresponding section in the thread handler class separating the sending inputs
             } catch (IOException e) {
 //                    displaying the input/output exceptions in a label
                 borrowMainStatusLb.setText("IOException " + e);
