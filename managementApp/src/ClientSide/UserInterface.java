@@ -11,14 +11,10 @@ import javax.swing.text.DocumentFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-//import java.util.ArrayList;
-//import java.util.Collections;
-//import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -70,10 +66,12 @@ public class UserInterface  extends JFrame {
 //
 //                }
 //                1a. Collect and validate  the users input
-                if(sortUserInput(lnVal.getText().trim(), fnVal.getText().trim())){
+                String firstname = fnVal.getText().trim();
+                String lastname = lnVal.getText().trim();
+                if(sortUserInput(lastname, firstname)){
 //                    Create a student instance to store or destroy upon validation
                     int studentID = Integer.parseInt(studentIdVal.getText().trim());
-                    Student student = new Student(studentID, fnVal.getText(), lnVal.getText());
+                    Student student = new Student(studentID, firstname, lastname);
                     //1b. check the user input match what is expected strings and int respectively
                     loginUser(student);
                 }
@@ -210,5 +208,39 @@ public class UserInterface  extends JFrame {
                 }
             }
         });
+        fnVal = new JTextField(20);
+            AbstractDocument doc = (AbstractDocument) fnVal.getDocument();
+            doc.setDocumentFilter(new DocumentFilter() {
+                @Override
+                public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                    // Filter out spaces when inserting text
+                    string = string.replaceAll("\\s", "");
+                    super.insertString(fb, offset, string, attr);
+                }
+
+                @Override
+                public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                    // Filter out spaces when replacing text
+                    text = text.replaceAll("\\s", "");
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            });
+            lnVal = new JTextField(20);
+            AbstractDocument document1 = (AbstractDocument) lnVal.getDocument();
+        document1.setDocumentFilter(new DocumentFilter() {
+                @Override
+                public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                    // Filter out spaces when inserting text
+                    string = string.replaceAll("\\s", "");
+                    super.insertString(fb, offset, string, attr);
+                }
+
+                @Override
+                public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                    // Filter out spaces when replacing text
+                    text = text.replaceAll("\\s", "");
+                    super.replace(fb, offset, length, text, attrs);
+                }
+            });
     }
 }

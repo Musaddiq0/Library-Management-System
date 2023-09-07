@@ -424,8 +424,8 @@ public class threadHandler implements  Runnable {
 //                    2. update the books and borrow table respectively
 //                    a. checking the input to validate it
                     String returnProcess1 = "Select * FROM Borrow WHERE BorrowID =?";
-                    String returnProcess2 = "DELETE FROM Borrow WHERE BorrowID =? ";
-                    String returnProcess3 = "Select Quantity FROM Books WHERE BookID =?";
+                    String returnProcess3 = "DELETE FROM Borrow WHERE BorrowID =? ";
+                    String returnProcess2 = "Select Quantity FROM Books WHERE BookID =?";
                     String finalReturnProcess = "UPDATE Books SET Quantity =? WHERE BookID=?";
                     int sqlCode = 0;
                     String responseTxt = new String();
@@ -448,38 +448,65 @@ public class threadHandler implements  Runnable {
                             System.out.println("Something wrong user reach here!!!!");
                         }
                         else{
-//                            delete the borrow entry for that user  on the DB
+//                           retrieve the quantity from the table to update it with the return book by the user
                             preparedStatement = connection.prepareStatement(returnProcess2);
-                            preparedStatement.setInt(1, (Integer) returnP1Data.get(0));
-                            sqlCode = preparedStatement.executeUpdate();
-//                            update books table after deletion from borrow table
-                            if(sqlCode>0){
-//                                retrieve the quantity from the table to update it with the return book by the user
+                            preparedStatement.setInt(1, (Integer) returnP1Data.get(4));
+                            ResultSet resultSet2 = preparedStatement.executeQuery();
+                            List<Object>returnP2data = new ArrayList<>();
+                            while(resultSet2.next()){
+                                returnP2data.add(resultSet2.getInt(1));//book quantity
+                            }
+                            int newQuantity  = (Integer)returnP2data.get(0) + 1; //update the quantity
+//                            make the return i.e delete and update the entry from the borrow table
+                            if(newQuantity>0){
+//                               make the deletion
                                 preparedStatement = connection.prepareStatement(returnProcess3);
-                                preparedStatement.setInt(1, (Integer) returnP1Data.get(5));
-                                ResultSet resultSet2 = preparedStatement.executeQuery();
-                                List<Object>returnP2data = new ArrayList<>();
-                                while(resultSet2.next()){
-                                    returnP2data.add(resultSet2.getInt(1));//book quantity
-                                }
-                                int newQuantity  = (Integer)returnP2data.get(0) + 1;
+                                preparedStatement.setInt(1, (Integer) returnP1Data.get(0));//borrowID
+                                sqlCode = preparedStatement.executeUpdate();
 //                                final return process update the books table so that the quantity value goes up with one
-                                if(newQuantity<0){
+                                if(sqlCode>0){
+                                    int borrowID = (int) returnP1Data.get(4);
                                     preparedStatement = connection.prepareStatement(finalReturnProcess);
                                     preparedStatement.setInt(1,newQuantity);
-                                    preparedStatement.setInt(2, (Integer) returnP1Data.get(5));
+                                    preparedStatement.setInt(2, borrowID);
                                     int rowsAffected = preparedStatement.executeUpdate();
                                     if (rowsAffected>0){
                                         responseTxt = "Sucessfully returned the book thank you have a nice day !!!";
+                                        String SQLquery = "SELECT Borrow.BorrowID, Borrow.Title, Borrow.Author FROM Borrow INNER JOIN Users ON Borrow.StudentID = Users.StudentID WHERE Borrow.StudentID = ?";
+                                        preparedStatement= connection.prepareStatement(SQLquery);
+                                        preparedStatement.setInt(1,(Integer) returnP1Data.get(3));
+                                        ResultSet borrowedBookList = preparedStatement.executeQuery();
+//                        2a. setting up the table structure
+                                        List<List<Object>> tabledata = new ArrayList<>();
+                                        while (borrowedBookList.next()){
+//                            store the data before
+                                            List<Object> columns = new ArrayList<>();
+                                            columns.add(borrowedBookList.getInt(1));
+                                            columns.add(borrowedBookList.getString(2));
+                                            columns.add(borrowedBookList.getString(3));
+                                            tabledata.add(columns);
+                                        }
+                                        List<String>cols = new ArrayList<>(Arrays.asList(BorroweMenuTablecols));
+//                       2b. Writing back to the Client
+//                                        2bi update the table to show remaining books borrowed if any
+                                        if(!tabledata.isEmpty()){
+                                            String stats = "Borrowed Books";
+                                            TableResponseContainer responseContainer = new TableResponseContainer(cols, tabledata,stats);
+                                            responseContainer.setBorrowedCode(0);
+                                            objectOutputStream.writeObject(responseContainer);
+                                        }
+
+                                        else{
+//                                            Writing back to the client GUI when no  remaining borrowed books
+                                            String stats = "No Borrowed Books";
+                                            TableResponseContainer responseContainer = new TableResponseContainer(cols, tabledata,stats);
+                                            responseContainer.setBorrowedCode(1);
+                                            objectOutputStream.writeObject(responseContainer);
+                                        }
                                     }
                                 }
                             }
                         }
-//                        Writting back to the client GUI
-                        serverResponse response = new serverResponse(sqlCode,responseTxt);
-                        response.setServerResponseFlag(sqlCode);
-                        response.setMssgToDisplay(responseTxt);
-                        objectOutputStream.writeObject(response);
                     }
 
 

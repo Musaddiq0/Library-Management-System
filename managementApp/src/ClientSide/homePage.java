@@ -85,16 +85,14 @@ public class homePage  extends JFrame{
              */
             @Override
             public void actionPerformed(ActionEvent e) {
-                ReturnPanel.updateUI();
-                ReturnPanel.setVisible(false);
-                homepageButtonsPanel.setVisible(true);
+                showHomepage();
 
 
             }
         });
     }
 
-    private void showBorrowedBooks(Student student) {
+    private synchronized void showBorrowedBooks(Student student) {
         if(objectInputStream != null && objectOutputStream!=null){
 //            sending the user details to get details of books borrowed if any
             try{
@@ -124,7 +122,10 @@ public class homePage  extends JFrame{
 
         }
     }
-
+/**This command returns the selected book to from the table and updating the table with the remaining books if any
+ * @param student student
+ * @param borrowedBooksTable GUI Table
+ * **/
     private synchronized void returnBook(Student student, JTable borrowedBooksTable) {
         if(objectInputStream != null && objectOutputStream!= null){
 //Steps
@@ -136,11 +137,19 @@ public class homePage  extends JFrame{
                 statusLabelHP.setText(e.getLocalizedMessage());
             }
 //            2. read the reply from the server
-            serverResponse response =null;
+            TableResponseContainer tableResponseContainer =null;
             try {
-                response= (serverResponse) objectInputStream.readObject();
+                tableResponseContainer = (TableResponseContainer) objectInputStream.readObject();
+                if(tableResponseContainer.getBorrowedCode() == 0){
+                    borrowedBooksTable.setModel(new GenericTableModel(tableResponseContainer.columns, tableResponseContainer.data));
+                }
+                else{
+                    statusLabelHP.setText(tableResponseContainer.getStatus());
+                    borrowedBooksTable.setVisible(false);
+                }
 
-            }catch (ClassNotFoundException e) {
+            }
+            catch (ClassNotFoundException e) {
                 statusLabelHP.setText("Class not found exception " +e);
             } catch (IOException e) {
                 throw new RuntimeException(e);
