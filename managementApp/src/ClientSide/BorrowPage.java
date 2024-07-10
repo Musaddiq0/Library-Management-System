@@ -6,10 +6,6 @@ import objParsing.serverResponse;
 import objParsing.clientMssg;
 
 import javax.swing.*;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DocumentFilter;
 import java.awt.event.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -37,6 +33,7 @@ public class BorrowPage extends JFrame {
     private JLabel dateFormatLabel;
     private JPanel viewBooksPanel;
     private JPanel tablePanel;
+    private JButton viewAllBooksButton;
     private Socket socket;
     private ObjectOutputStream objectOutputStream;
     private ObjectInputStream objectInputStream;
@@ -130,6 +127,7 @@ public class BorrowPage extends JFrame {
                 showHomepage(student);
             }
         });
+
     }
 
     public void initBorrowPage() {
@@ -170,18 +168,12 @@ public class BorrowPage extends JFrame {
      * This method check to see that at least one of the text-fields on the GUI  contains only valid alphabets letters.
      **/
     public static boolean sortUserInputSize(String author, String title) {
-        boolean checkbit = false;
 //        Steps
-//        1. if the title text-field contains text and not numbers becasue books titles could be numbers like 1984
+//        1. if the title text-field contains text and not numbers because books titles could be numbers like 1984
         if (!author.isBlank()) {
 //            title.trim();
-            checkbit = true;
-            return checkbit;
-        } else if (!title.isBlank()) {
-            checkbit = true;
-            return checkbit;
-        }
-        return checkbit;
+            return true;
+        } else return !title.isBlank();
     }
 
     /**

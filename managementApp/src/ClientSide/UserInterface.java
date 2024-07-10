@@ -2,19 +2,21 @@ package ClientSide;
 
 import objParsing.actionClass;
 import objParsing.clientMssg;
+import objParsing.serverResponse;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
+import java.awt.event.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +34,16 @@ public class UserInterface  extends JFrame {
     private JLabel loginInstLabel;
     private JButton loginButton;
     private JButton cancelButton;
+    private JTextField stIDL;
+    private JPanel loginPanel;
+    private JButton registerButton;
+    private JPanel registerPanel;
+    private JTabbedPane tabbedPane1;
+    private JPanel Register;
+    private JPanel Login;
+    private JPasswordField passWR;
+    private JPasswordField passWLogin;
+    private char[] passWord;
 
     private ObjectInputStream objectInputStream;
     private ObjectOutputStream objectOutputStream;
@@ -56,42 +68,108 @@ public class UserInterface  extends JFrame {
         initGUI();
         reconnectToServer();
         cancelButton.addActionListener(new actionClass());
-        loginButton.addActionListener(new ActionListener() {
+        loginButton.addActionListener(new ActionListener()  {
             @Override
             public void actionPerformed(ActionEvent e) {
 //                //Cautionary Steps to handle exceptions
 //                try{
-//
 //                }catch (NumberFormatException){
 //
 //                }
 //                1a. Collect and validate  the users input
-                String firstname = fnVal.getText().trim();
-                String lastname = lnVal.getText().trim();
-                if(sortUserInput(lastname, firstname)){
-//                    Create a student instance to store or destroy upon validation
-                    int studentID = Integer.parseInt(studentIdVal.getText().trim());
-                    Student student = new Student(studentID, firstname, lastname);
-                    //1b. check the user input match what is expected strings and int respectively
-                    loginUser(student);
+                int studentID = Integer.parseInt(stIDL.getText());
+                String password = Arrays.toString(passWLogin.getPassword());
+//                String firstname = fnVal.getText().trim();
+//                String lastname = lnVal.getText().trim();
+                if(validatePassword(password)){
+                    Student potentialStudent = new Student(studentID,password);
+                    loginUser(potentialStudent);
                 }
+//                if(sortUserInput(lastname, firstname)){
+////                    Create a student instance to store or destroy upon validation
+//                    int studentID = Integer.parseInt(studentIdVal.getText().trim());
+//                    Student student = new Student(studentID, firstname, lastname);
+//                    //1b. check the user input match what is expected strings and int respectively
+//                    loginUser(student);
+//                }
                else{
                    reconnectToServer();
-                   JOptionPane.showMessageDialog(fnVal, "Please enter a valid login details in the spaces provided!!!");
+                   JOptionPane.showMessageDialog(mainPanel, "Please enter a valid login details in the spaces provided!!!");
 //                   try {
 //                       student.destroy();
 //                   } catch (Throwable ex) {
 //                       throw new RuntimeException(ex);
 //                   }
-
                }
-                //2. run the login method with the users inputs collected
-
             }
         });
-    }
+        registerButton.addActionListener(new ActionListener() {
+                /**
+                 * @param e the event to be processed
+                 */
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    //get the values from th text-field
+                    studentIdVal.addKeyListener(new KeyAdapter() {
+                        /**
+                         * @param e the event to be processed
+                         */
+                        @Override
+                        public void keyTyped(KeyEvent e) {
+                            char n = e.getKeyChar();
+                            if(!Character.isDigit(n)){
+                                e.consume();
+                                JOptionPane.showMessageDialog(registerPanel,"Please enter only alphabets");
 
-    /**This method accepts the student class as the argument and sends the student data for verification
+                            }
+                        }
+                    });
+                    fnVal.addKeyListener(new KeyAdapter() {
+                        /**
+                         * @param e the event to be processed
+                         */
+                        @Override
+                        public void keyTyped(KeyEvent e) {
+                            char n = e.getKeyChar();
+                            if(!Character.isLetter(n)){
+                                e.consume();
+                                JOptionPane.showMessageDialog(registerPanel,"Please enter only alphabets");
+
+                            }
+                        }
+                    });
+                    lnVal.addKeyListener(new KeyAdapter() {
+                        /**
+                         * @param e the event to be processed
+                         */
+                        @Override
+                        public void keyTyped(KeyEvent e) {
+                            char n = e.getKeyChar();
+                            if(!Character.isLetter(n) && !Character.isWhitespace(n)){
+                                e.consume();
+                                JOptionPane.showMessageDialog(mainPanel,"Please enter only alphabets");
+                            }
+                        }
+                    });
+                    passWord = passWR.getPassword();
+                    if(validatePassword(Arrays.toString(passWord))){
+                        String stdID = studentIdVal.getText();
+                        String firstName = fnVal.getText();
+                        String lastName = lnVal.getText();
+                        Student newStudent = new Student(Integer.parseInt(stdID),firstName,lastName);
+                        newStudent.setPassword(Arrays.toString(passWord));
+                        createUser(newStudent);
+
+
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(mainAppPanel,"Please enter a password containing numbers and letters!!!");
+                    }
+                }
+            });
+        }
+
+    /**This method accepts the student class as the argument and sends the student data for verification on the database
      * @param potentialStudent object of the Student class for easy access to  student data*/
     private synchronized void loginUser(Student potentialStudent) {
         if (objectInputStream != null && objectOutputStream != null){
@@ -105,16 +183,19 @@ public class UserInterface  extends JFrame {
             }
             //3. receive reply from the server using the object input stream
             clientMssg reply;
+            Student confirmedStudent;
             try{
                 reply = (clientMssg) objectInputStream.readObject();
+                confirmedStudent= (Student)objectInputStream.readObject();
                 int loginStat = reply.getLoginStatus();
                 if (loginStat==0){
-                    JOptionPane.showMessageDialog(mainPanel, "Please enter valid login details and try again!!!");
-                    potentialStudent = null;
+                    loginUnsucessful(confirmedStudent);
+                    JOptionPane.showMessageDialog(mainPanel, reply.getStatusMssg());
+
                 }
                 else{
                     statusLabel.setText(reply.getStatusMssg());
-                    loginSuccess(potentialStudent);
+                    loginSuccess(confirmedStudent);
                 }
 
             }catch (IOException e){
@@ -128,6 +209,46 @@ public class UserInterface  extends JFrame {
         else {
             statusLabel.setText("Connection to the server not established");
         }
+    }
+    private synchronized void createUser(Student newStudent){
+        if (objectInputStream != null && objectOutputStream != null){
+            //Steps
+            //1. Prepare and parse the inputs to the outputStream to send to the server (command and studentship)
+            try{
+                objectOutputStream.writeObject(new clientMssg(clientMssg.clientCommands.CREATEUSER, newStudent, Arrays.toString(passWord)));
+
+            }catch (IOException e){
+                statusLabel.setText("IOException " + e);
+            }
+            //3. receive reply from the server using the object input stream
+            serverResponse reply = new serverResponse();
+            try{
+                reply = (serverResponse) objectInputStream.readObject();
+                int loginStat = reply.getServerResponseFlag();
+                if (loginStat<=0){
+                    JOptionPane.showMessageDialog(mainPanel, "Please try again");
+                    newStudent = null;
+                }
+                else{
+//                    statusLabel.setText(reply.getStatusMssg());
+                    JOptionPane.showMessageDialog(mainPanel, reply.getMssgToDisplay());
+
+                }
+
+            }catch (IOException e){
+                statusLabel.setText("IOException" + e);
+
+            }catch (ClassNotFoundException e){
+                statusLabel.setText("Class not found exception" + e);
+
+            }
+        }
+        else {
+            statusLabel.setText("Connection to the server not established");
+        }
+
+
+
     }
     /**This method draws the inital login page GUI*/
     private void initGUI() {
@@ -148,6 +269,10 @@ public class UserInterface  extends JFrame {
         this.setVisible(false);
 
     }
+    private void loginUnsucessful(Student fakeStudent){
+        stIDL.setText(null);
+        passWLogin.setText(null);
+    }
 
 //    protected String loginUser(){
 //        return fnVal.getText();
@@ -166,6 +291,26 @@ public class UserInterface  extends JFrame {
                 socket = null;
             }
         }
+    }
+    /**This method checks the password contains numbers and letters
+     * @param password This is from the user input
+     * **/
+    private static boolean validatePassword(@NotNull String password){
+        boolean hasNumber= false;
+        boolean hasAlphabet= false;
+
+        for(char c: password.toCharArray()){
+            if (Character.isLetter(c)){
+                hasAlphabet =true;
+            }
+            if(Character.isDigit(c)){
+                hasNumber =true;
+            }
+            if(hasAlphabet&&hasNumber){
+                return true;
+            }
+        }
+        return  false;
     }
 
     /**This method reconnects the socket and makes connection to the server*/

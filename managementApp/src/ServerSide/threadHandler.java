@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -61,13 +64,15 @@ public class threadHandler implements  Runnable {
                 if(objParsing.getCommands() == clientMssg.clientCommands.LOGIN){
 //                    steps
 //                    1. get the student details name, stdID and lastname
+                    boolean checkID =false;
                     int studentID = studParcels.getStudentID();
+                    String passwordGUI = studParcels.getPassword();
                     String fname = studParcels.getFirstName();
                     String lsname = studParcels.getLastName();
 //                  create the sql commands to send to the server
                     String idSQLCmd = "SELECT COUNT() FROM Users WHERE StudentID=?";
-                    String fnSQLCmd = "SELECT COUNT() FROM Users WHERE FirstName=?";
-                    String lnSQLCmd = "SELECT COUNT() FROM Users WHERE LastName=?";
+//                    String fnSQLCmd = "SELECT COUNT() FROM Users WHERE FirstName=?";
+//                    String lnSQLCmd = "SELECT COUNT() FROM Users WHERE LastName=?";
 //                        preparedStatement.setString(2,loginDetails[1]);
 //                        preparedStatement.setString(3,loginDetails[2]);
                     // Array list to store the result from DB for all SQL commands
@@ -79,35 +84,78 @@ public class threadHandler implements  Runnable {
                         idPreparedStatement.setInt(1,studentID);
                         ResultSet idResult = idPreparedStatement.executeQuery();
                         int idExist = Integer.parseInt(idResult.getString(1));
-                        sqlresult.add(idExist);
-                        //checking if the entered firstname exists
-                        PreparedStatement fnPreparedStatement = connection.prepareStatement(fnSQLCmd);
-                        connection.prepareStatement(fnSQLCmd);
-                        fnPreparedStatement.setString(1,fname);
-                        ResultSet fnResult = fnPreparedStatement.executeQuery();
-                        int fnExist = fnResult.getInt(1);
-                        sqlresult.add(fnExist);
-                        //checking if the entered lastname exists and corresponds
-                        PreparedStatement lnPreparedStatement = connection.prepareStatement(lnSQLCmd);
-                        connection.prepareStatement(lnSQLCmd);
-                        lnPreparedStatement.setString(1,lsname);
-                        ResultSet lnResult = lnPreparedStatement.executeQuery();
-                        int lnExist = lnResult.getInt(1);
-                        sqlresult.add(lnExist);
+                        if(idExist > 0){
+                           String command = "Select Password, Salt, FirstName, lastName FROM Users WHERE StudentId=?";
+                           PreparedStatement passPS = connection.prepareStatement(command);
+                           passPS.setInt(1,studentID);
+                           ResultSet passCheck = passPS.executeQuery();
+                           List<Object> passwChkResultsFromDB = new ArrayList<>();
+                           while (passCheck.next()){
+                               passwChkResultsFromDB.add(passCheck.getString(1));//password;
+                               passwChkResultsFromDB.add(passCheck.getString(2));//salt;
+                               passwChkResultsFromDB.add(passCheck.getString(3));//firstname
+                               passwChkResultsFromDB.add(passCheck.getString(4));//lastName
+
+                           }
+                           String salt = (String) passwChkResultsFromDB.get(1);
+                           String passwordDB = (String) passwChkResultsFromDB.get(0);
+                           String firstname = (String)passwChkResultsFromDB.get(2);
+                           String lastname = (String)passwChkResultsFromDB.get(passwChkResultsFromDB.size()-1);
+                           studParcels.setFirstName(firstname);
+                            studParcels.setLastName(lastname);
+                            studParcels.setPassword(null);
+//                           comparing the password to confirm the user
+                            String compaingPair = hashPassword(passwordGUI,salt);
+                            if(compaingPair.compareTo(passwordDB) == 0){
+                                objParsing.setLoginStatus(1);
+                                objParsing.setStatusMssg("Welcome " + firstname);
+                                objectOutputStream.writeObject(objParsing);
+                                objectOutputStream.writeObject(studParcels);
+
+                            }
+                            else{
+                                objParsing.setLoginStatus(0);
+                                studParcels.resetStudent(studParcels);
+                                objParsing.setStatusMssg("Error Wrong Details please check and try again!!! ");
+                                objectOutputStream.writeObject(objParsing);
+                                objectOutputStream.writeObject(studParcels);
+
+                            }
+                        }
+                        else {
+                            objParsing.setLoginStatus(0);
+                            objParsing.setStatusMssg("Error Wrong Details please check and try again!!! ");
+                            objectOutputStream.writeObject(objParsing);
+                        }
+//                        sqlresult.add(idExist);
+//                        //checking if the entered firstname exists
+//                        PreparedStatement fnPreparedStatement = connection.prepareStatement(fnSQLCmd);
+//                        connection.prepareStatement(fnSQLCmd);
+//                        fnPreparedStatement.setString(1,fname);
+//                        ResultSet fnResult = fnPreparedStatement.executeQuery();
+//                        int fnExist = fnResult.getInt(1);
+//                        sqlresult.add(fnExist);
+//                        //checking if the entered lastname exists and corresponds
+//                        PreparedStatement lnPreparedStatement = connection.prepareStatement(lnSQLCmd);
+//                        connection.prepareStatement(lnSQLCmd);
+//                        lnPreparedStatement.setString(1,lsname);
+//                        ResultSet lnResult = lnPreparedStatement.executeQuery();
+//                        int lnExist = lnResult.getInt(1);
+//                        sqlresult.add(lnExist);
                         //checking if the list contain a zero to identify an invalid login
 
                     }
-                    if(sqlresult.contains(0)){ //if the users doesn't exist
-                        objParsing.setStatusMssg("User does not exist");
-                        objParsing.setLoginStatus(0);
-                        objectOutputStream.writeObject(objParsing);
-                    }
+//                    if(sqlresult.contains(0)){ //if the users doesn't exist
+//                        objParsing.setStatusMssg("User does not exist");
+//                        objParsing.setLoginStatus(0);
+//                        objectOutputStream.writeObject(objParsing);
+//                    }
 
-                    else{
-                        objParsing.setLoginStatus(1);
-                        objParsing.setStatusMssg("Welcome " + fname);
-                        objectOutputStream.writeObject(objParsing);
-                    }
+//                    else{
+//                        objParsing.setLoginStatus(1);
+//                        objParsing.setStatusMssg("Welcome " + fname);
+//                        objectOutputStream.writeObject(objParsing);
+//                    }
                 }
                 else if(objParsing.getCommands() == clientMssg.clientCommands.CHECKFORBOOKUSERINPUT){
 //                    steps
@@ -512,12 +560,51 @@ public class threadHandler implements  Runnable {
 
 
                 }
+                else if (objParsing.getCommands() == clientMssg.clientCommands.CREATEUSER){
+                    String passW = objParsing.getUserInput();
+                    String firstName = studParcels.getFirstName();
+                    String lastName = studParcels.getLastName();
+                    int studentID =studParcels.getStudentID();
+                    String salt = saltGen();
+                    String hashedPassword = hashPassword(passW,salt);
+                    String command = "INSERT into Users(StudentID, FirstName, LastName, Password, Salt) VALUES(?,?,?,?,?)";
+                    try(Connection connection = sqlConn.getConnected()){
+                        System.out.println("Connected to the DB");
+                        PreparedStatement ps = connection.prepareStatement(command);
+                        ps.setInt(1,studentID);
+                        ps.setString(2,firstName);
+                        ps.setString(3,lastName);
+                        ps.setString(4,hashedPassword);
+                        ps.setString(5,salt);
+                        int sqlStatus = ps.executeUpdate();
+                        String dbResponse = null;
+                        serverResponse response = new serverResponse();
+                        if(sqlStatus >0){
+                            dbResponse = "Registration complete Please enter your login details to login ";
+                            response.setServerResponseFlag(sqlStatus);
+                            response.setMssgToDisplay(dbResponse);
+                            objectOutputStream.writeObject(response);
+                            System.out.println(dbResponse);
+                        }
+                        else{
+                            System.out.println("somthing wong !!!!!");
+                        }
+
+
+
+                    }
+                    System.out.println(salt);
+
+                }
+
             }
         }catch (IOException ex){
             Logger.getLogger(threadHandler.class.getName()).log(Level.SEVERE,null,ex);
         }catch (ClassNotFoundException | SQLException e){
             e.printStackTrace();
-        }finally {
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } finally {
 //            killing the thread after completing a client - server communication
             try{
                 threadCount("We have lost connection to the client " + threadNo + ".");
@@ -569,6 +656,26 @@ public class threadHandler implements  Runnable {
     public String getbooksAllSQL(){
         return " SELECT * FROM Books WHERE Author = ? AND Title = ?";
     }
+    public static String saltGen() throws NoSuchAlgorithmException {
+        SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
+        byte[] salt = new byte[16];
+        secureRandom.nextBytes(salt);
+        return Base64.getEncoder().encodeToString(salt);
+    }
+    public static String hashPassword(String password, String salt){
+        try{
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(Base64.getDecoder().decode(salt));
+            byte[] hashedPassword = md.digest(password.getBytes());
+            return Base64.getEncoder().encodeToString(hashedPassword);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+
 
 ////    public List<List<Object>> retrnAllColumns (ResultSet resultSet, int numberOfCols) throws SQLException {
 ////        List<List<Object>>tableData = new ArrayList<>();

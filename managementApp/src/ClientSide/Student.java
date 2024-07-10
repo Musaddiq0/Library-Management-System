@@ -3,9 +3,10 @@ package ClientSide;
 import java.io.Serializable;
 
 public class Student implements Serializable {
-    private final String firstName;
-    private final String lastName;
-    private final int studentID;
+    public String firstName;
+    private String lastName;
+    private  int studentID;
+    private String password ;
     private  int noBorrowedBooks;
     private String sqlStatus;
 
@@ -18,6 +19,12 @@ public class Student implements Serializable {
         this.firstName = firstName;
         this.lastName = lastName;
         this.studentID =studentID;
+    }
+
+
+    public Student (int studentID, String password){
+        this.studentID =studentID;
+        this.password =password;
     }
 
     public String getFirstName() {
@@ -40,6 +47,10 @@ public class Student implements Serializable {
         return studentID;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
     public void setNoBorrowedBooks(int noBorrowedBooks) {
         this.noBorrowedBooks = noBorrowedBooks;
     }
@@ -47,5 +58,17 @@ public class Student implements Serializable {
     public void setSqlStatus(String sqlStatus) {
         this.sqlStatus = sqlStatus;
     }
+    public void setPassword(String password){this.password =password;}
+    public  void setFirstName(String firstName){
+        this.firstName=firstName;
+    }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
+    public void resetStudent(Student fakeStudent) {
+        fakeStudent.studentID =0;
+        fakeStudent.setPassword(null);
+        fakeStudent.setFirstName(null);
+    }
 }

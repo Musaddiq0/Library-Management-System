@@ -48,7 +48,7 @@ public class homePage  extends JFrame{
     public homePage(Student curStudent){
         super();
         this.student = curStudent;
-        showHomepage();
+        showHomepage(student);
         userInformationButton.addActionListener(e -> showUsrInforPage(student));
         loginPageButton.addActionListener(e -> loginPageSetUp());
         borrowPageButton.addActionListener(e -> showBorrowPage());
@@ -85,7 +85,8 @@ public class homePage  extends JFrame{
              */
             @Override
             public void actionPerformed(ActionEvent e) {
-                showHomepage();
+                showHomepage(student);
+                ReturnPanel.setVisible(false);
 
 
             }
@@ -173,7 +174,7 @@ public class homePage  extends JFrame{
     }
 
     private Socket socket;
-    private void showHomepage() {
+    private void showHomepage(Student student) {
         reconnectToServer();
         this.setContentPane(homepageMainPanel);
         ReturnPanel.setVisible(false);

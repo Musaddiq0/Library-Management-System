@@ -125,7 +125,7 @@
               <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Author"/>
+              <text value="Search by Author"/>
             </properties>
           </component>
           <component id="5d248" class="javax.swing.JLabel" binding="titlevalueLabel">
@@ -133,7 +133,7 @@
               <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Title"/>
+              <text value="Search by Title"/>
             </properties>
           </component>
           <component id="da144" class="javax.swing.JButton" binding="viewButton" default-binding="true">
