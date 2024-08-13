@@ -2,7 +2,6 @@ package ClientSide;
 import objParsing.GenericTableModel;
 import objParsing.TableResponseContainer;
 import objParsing.clientMssg;
-import objParsing.serverResponse;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -48,7 +47,7 @@ public class homePage  extends JFrame{
     public homePage(Student curStudent){
         super();
         this.student = curStudent;
-        showHomepage(student);
+        showHomePageGUI(student);
         userInformationButton.addActionListener(e -> showUsrInforPage(student));
         loginPageButton.addActionListener(e -> loginPageSetUp());
         borrowPageButton.addActionListener(e -> showBorrowPage());
@@ -83,7 +82,7 @@ public class homePage  extends JFrame{
              */
             @Override
             public void actionPerformed(ActionEvent e) {
-                showHomepage(student);
+                showHomePageGUI(student);
                 ReturnPanel.setVisible(false);
 
 
@@ -94,7 +93,7 @@ public class homePage  extends JFrame{
     private void showReturnPage(Student curStudent){
         ReturnPage returnPage= new ReturnPage(curStudent);
         returnPage.connectionMssg.setText("Connection to the server established");
-        this.setVisible(false);
+//        this.setVisible(false);
 
     }
 
@@ -179,7 +178,7 @@ public class homePage  extends JFrame{
     }
 
     private Socket socket;
-    private void showHomepage(Student student) {
+    private void showHomePageGUI(Student student) {
         reconnectToServer();
         this.setContentPane(homepageMainPanel);
         ReturnPanel.setVisible(false);

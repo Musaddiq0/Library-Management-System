@@ -427,7 +427,7 @@ public class threadHandler implements  Runnable {
 //                  1b. search and collect the details of the books a student has borrowed
                     try(Connection connection = sqlConn.getConnected()){
                         System.out.println("Connected to the SQL database");
-                        String SQLquery = "SELECT Borrow.BorrowID, Borrow.Title, Borrow.Author, Borrow.BorrowedDate FROM Borrow INNER JOIN Users ON Borrow.StudentID = Users.StudentID WHERE Borrow.StudentID = ?";
+                        String SQLquery = "SELECT Borrow.BorrowID, Borrow.Title, Borrow.Author, Borrow.BorrowDate FROM Borrow INNER JOIN Users ON Borrow.StudentID = Users.StudentID WHERE Borrow.StudentID = ?";
 //                        1c. process the query
                         PreparedStatement preparedStatement = connection.prepareStatement(SQLquery);
                         preparedStatement.setInt(1,ID);

@@ -34,6 +34,7 @@ public class ReturnPage extends JFrame{
     public ReturnPage(Student loginStudent){
         super();
         this.student = loginStudent;
+        showHomePageGUI(loginStudent);
         borrowedBooksTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         showBorrowedBooks(loginStudent);
 
@@ -111,7 +112,7 @@ public class ReturnPage extends JFrame{
 //Steps
 //            1.  send the users selection from the table
             try{
-                clientMssg clientMssg = new clientMssg(objParsing.clientMssg.clientCommands.BORROWBOOK);
+                clientMssg clientMssg = new clientMssg(objParsing.clientMssg.clientCommands.RETURNBOOK);
                 clientMssg.setBooksSelected(returnData);
                 clientMssg.setStudParcels(student);
                 objectOutputStream.writeObject(clientMssg);
@@ -129,7 +130,6 @@ public class ReturnPage extends JFrame{
                     connectionMssg.setText(tableResponseContainer.getStatus());
                     borrowedBooksTable.setVisible(false);
                 }
-
             }
             catch (ClassNotFoundException e) {
                 connectionMssg.setText("Class not found exception " +e);
@@ -139,6 +139,19 @@ public class ReturnPage extends JFrame{
 
         }
     }
+
+    private void showHomePageGUI(Student student) {
+        reconnectToServer();
+        this.setContentPane(ReturnPanel);
+        returnGreeting.setText("Welcome to the Library application " +student.getFirstName());
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setSize(800,800);
+        this.setVisible(true);
+        this.pack();
+        this.addWindowListener( new WindowAdapter(){
+        });
+    }
+
     private void endConnection() {
         if(socket != null){
             System.out.println("Status: Closing connection");
