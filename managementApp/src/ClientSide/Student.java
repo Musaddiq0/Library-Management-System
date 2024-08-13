@@ -1,6 +1,8 @@
 package ClientSide;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.List;
 
 public class Student implements Serializable {
     public String firstName;
@@ -9,6 +11,8 @@ public class Student implements Serializable {
     private String password ;
     private  int noBorrowedBooks;
     private String sqlStatus;
+    private LocalDate borrowDate;
+    private List<Object> borrowBooksRequest;
 
 /**This class sole purpose is to get students data from the database table it is  also used to transport information between server and client
  * @param studentID student ID as it is on the db
@@ -51,6 +55,7 @@ public class Student implements Serializable {
         return password;
     }
 
+
     public void setNoBorrowedBooks(int noBorrowedBooks) {
         this.noBorrowedBooks = noBorrowedBooks;
     }
@@ -70,5 +75,21 @@ public class Student implements Serializable {
         fakeStudent.studentID =0;
         fakeStudent.setPassword(null);
         fakeStudent.setFirstName(null);
+    }
+
+    public LocalDate getBorrowDate() {
+        return borrowDate;
+    }
+
+    public void setBorrowDate(LocalDate borrowDate) {
+        this.borrowDate = borrowDate;
+    }
+
+    public List<Object> getBorrowBooksRequest() {
+        return borrowBooksRequest;
+    }
+
+    public void setBorrowBooksRequest(List<Object> borrowBooksRequest) {
+        this.borrowBooksRequest = borrowBooksRequest;
     }
 }

@@ -36,6 +36,10 @@ public class TableResponseContainer implements Serializable {
         this.borrowedCode = borrowedCode;
     }
 
+    public TableResponseContainer (String status){
+        this.status = status;
+    }
+
 //    public TableResponseContainer(List<String> booksCols) {
 //     this.booksCols = booksCols;
 //    }

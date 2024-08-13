@@ -1,7 +1,9 @@
 package objParsing;
 
+import ClientSide.Student;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -12,15 +14,15 @@ public class clientMssg implements Serializable {
     //Steps
     // 1. create enum for commands from the client-side
     public enum clientCommands{
-    LOGIN,CREATEUSER, CHECKFORBOOKUSERINPUT, BORROWBOOK, UserInfoParcel, GETNUMBORROWBOOKS, RETURNBOOK, BORROWEDBOOKSMENUINFO
+    LOGIN,CREATEUSER, CHECKFORBOOKUSERINPUT, BORROWBOOK, VIEWALLBOOKS, GETNUMBORROWBOOKS, RETURNBOOK, BORROWEDBOOKSMENUINFO
     }
     private final clientCommands commands;
     private  String statusMssg;
     private  String userInput;
     private int loginRst;
-    private Date returnDate;
+    private LocalDate returnDate;
     private List <Object> booksSelected;
-    private Object studParcels;
+    private Student studParcels;
 //    private final bo
 
 
@@ -35,6 +37,7 @@ public class clientMssg implements Serializable {
 ////        this.booksSelected = books;
 ////    }
     /**
+     *
      * This constructor accepts two parameters, to update the server of the clients request and the user input from forms
      * @param commands the request from the GUI i.e. button clicked, or event triggered
      * @param userInput the input the user typed in the text-field provided
@@ -43,27 +46,31 @@ public class clientMssg implements Serializable {
         this.commands = commands;
         this.userInput = userInput;
     }
-    public clientMssg (clientCommands commands, Object studParcels, String userInput){
+    public clientMssg (clientCommands commands, Student studParcels, String userInput){
         this.commands =commands;
         this.studParcels =studParcels;
         this.userInput =userInput;
     }
 /**This constructor takes in the command and a list of objects**/
-    public clientMssg(clientCommands commands, Object studParcels, List<Object> booksSelected){
+    public clientMssg(clientCommands commands, Student studParcels, List<Object> booksSelected){
         this.commands = commands;
         this.booksSelected = booksSelected;
         this.studParcels = studParcels;
     }
 
-    public clientMssg(clientCommands commands, List <Object>  selectedBooks, Date borrowDate){
-        this.commands = commands;
-        this.booksSelected = selectedBooks;
-        this.returnDate = borrowDate;
-    }
+//    public clientMssg(clientCommands commands, List <Object>  selectedBooks, LocalDate borrowDate){
+//        this.commands = commands;
+//        this.booksSelected = selectedBooks;
+//        this.returnDate = borrowDate;
+//    }
 
-    public clientMssg (clientCommands commands, Object studParcels){
+    public clientMssg (clientCommands commands, Student studParcels){
         this.commands =commands;
         this.studParcels =studParcels;
+    }
+
+    public clientMssg(clientCommands commands){
+        this.commands = commands;
     }
 
     // 3. setters and getters to update the server and clients about commands
@@ -80,7 +87,7 @@ public class clientMssg implements Serializable {
         return userInput;
     }
 
-    public Date getReturnDate(){
+    public LocalDate getReturnDate(){
         return returnDate;
     }
 
@@ -92,8 +99,16 @@ public class clientMssg implements Serializable {
         return booksSelected;
     }
 
-    public Object getStudParcels() {
+    public void setBooksSelected(List<Object> booksSelected) {
+        this.booksSelected = booksSelected;
+    }
+
+    public Student getStudParcels() {
         return studParcels;
+    }
+
+    public void setStudParcels(Student studParcels) {
+        this.studParcels=studParcels;
     }
 
     public int getLoginStatus() {

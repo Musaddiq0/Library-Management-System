@@ -33,9 +33,9 @@ public class serverResponse implements Serializable {
         return serverResponseFlag;
     }
 
-    public List<Object> getUserInfoParcels() {
-        return userInfoParcels;
-    }
+//    public List<Object> getUserInfoParcels() {
+//        return userInfoParcels;
+//    }
 
     public String getMssgToDisplay() {
         return mssgToDisplay;
@@ -53,9 +53,9 @@ public class serverResponse implements Serializable {
         this.serverResponseFlag = serverResponseFlag;
     }
 
-    public void setUserInfoParcels(List<Object> userInfoParcels) {
-        this.userInfoParcels = userInfoParcels;
-    }
+//    public void setUserInfoParcels(List<Object> userInfoParcels) {
+//        this.userInfoParcels = userInfoParcels;
+//    }
 
     public void setSqlcode(String sqlcode) {
         this.sqlcode = sqlcode;

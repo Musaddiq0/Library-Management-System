@@ -14,8 +14,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.*;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.*;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,8 +28,8 @@ public class threadHandler implements  Runnable {
     private final int threadNo;
     ObjectInputStream objectInputStream;
     ObjectOutputStream   objectOutputStream;
-    String[] booksCols = {"BookID", "Title", "Author", "Genre","Quantity"};
-    String[] BorroweMenuTablecols = {"BorrowID", "Title", "Author"};
+    String[] booksCols = {"BookID", "Title", "Author", "Genre"};
+    String[] BorroweMenuTablecols = {"BorrowID", "Title", "Author", "Borrowed Date"};
 
     public threadHandler(Socket socket) throws IOException {
         this.socket = socket;
@@ -55,9 +56,8 @@ public class threadHandler implements  Runnable {
             while((objParsing = (clientMssg) objectInputStream.readObject()) != null ){
                 //reading the clients msg and storing the read values
                 System.out.println(objParsing.getCommands());
-                Student studParcels;
+                 Student studParcels = (Student) objParsing.getStudParcels();
                 String clientSays = objParsing.getUserInput();
-                studParcels = (Student) objParsing.getStudParcels();
                 List <Object>  borrowBooksInfo = objParsing.getBooksSelected();
 
                 //checking the commands and performing the actions respectively
@@ -167,20 +167,19 @@ public class threadHandler implements  Runnable {
 //                        establish the connection to the DB
                         try (Connection connection =  ServerSide.sqlConn.getConnected()) {
                             System.out.println("connection to DB established");
-//                            pass the query to excute
+//                            pass the query to execute
                             PreparedStatement preparedStatement = connection.prepareStatement(returnBooksQuery);
                             preparedStatement.setString(1, userInput[1]);
 //                            store the query results in a ResultSet if any
                             ResultSet viewBooksResult = preparedStatement.executeQuery();
 //                            setting up the table data structure (rows and columns )
                             List<List<Object>> booksResult = new ArrayList<>();
-                            while (viewBooksResult.next()) {
+                            while (viewBooksResult.next()){
                                 List<Object> tableCols = new ArrayList<>();
                                 tableCols.add(viewBooksResult.getInt(1)); //bookid
                                 tableCols.add(viewBooksResult.getString(2));//title
                                 tableCols.add(viewBooksResult.getString(3));//author
                                 tableCols.add(viewBooksResult.getString(4));//genre
-                                tableCols.add(viewBooksResult.getInt(5));//quantity
                                 booksResult.add(tableCols);
                             }
 //                            sending back to the server to display
@@ -258,7 +257,6 @@ public class threadHandler implements  Runnable {
                                 tableCols.add(viewBooksResult.getString(2));//title
                                 tableCols.add(viewBooksResult.getString(3));//author
                                 tableCols.add(viewBooksResult.getString(4));//genre
-                                tableCols.add(viewBooksResult.getInt(5));//quantity
                                 sqlResultsFromDB.add(tableCols);
                             }
 //                           sending back to the server to display
@@ -284,37 +282,40 @@ public class threadHandler implements  Runnable {
                 else if (objParsing.getCommands() == clientMssg.clientCommands.BORROWBOOK) {
                     //Steps
                     // 1. Get the input sent from the UI and store for processing
-                    String sortedInput = getString(borrowBooksInfo);
+//                    Student student = (Student)objParsing.getStudParcels();
+//                    String userInput = getString(studParcels.getBorrowBooksRequest());
 //                    split the sorted client details and store in an array
-                    String[] userInput = sortedInput.split("\\&");
-                    Date date = objParsing.getReturnDate();
+//                    String[] separateInput = userInput.split("\\&");
+//                    LocalDate date = studParcels.getBorrowDate();
+                    LocalDate sysDate = LocalDate.now();
 //                    convert the date to SQL date format
-                    java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+//                    java.sql.Date sqlDate = new java.sql.Date();
 //                  set the SQL query
-                    String sql = "INSERT INTO Borrow (BorrowID, Title, Author, ReturnDate,StudentID,BookID,Genre) VALUES (?, ?, ?, ?, ?, ?,?)";
+                    String sql = "INSERT INTO Borrow (BorrowID, Title, Author, ReturnDate,StudentID,BookID,Genre,BorrowDate) VALUES (?, ?, ?, ?, ?, ?,?,?)";
 //                    Create the SQL connection
                     try(Connection connect = sqlConn.getConnected()){
                         System.out.println("connection to DB established");
 //                        update the borrow table on the SQL to reflect the user request
                         PreparedStatement preparedStatement = connect.prepareStatement(sql);
-                        preparedStatement.setInt(1, Integer.parseInt(userInput[4].trim())); //BorrowID
-                        preparedStatement.setString(2,userInput[2].trim());  //Title
-                        preparedStatement.setString(3, userInput[3].trim()); //Author
-                        preparedStatement.setDate(4, (sqlDate)); //ReturnDate
-                        preparedStatement.setInt(5, Integer.parseInt(userInput[0].trim())); //StudentID,
-                        preparedStatement.setInt(6, Integer.parseInt(userInput[1].trim())); //BorrowID
-                        preparedStatement.setString(7,userInput[5].trim());//genre
-//                        store the query result code
+                        preparedStatement.setInt(1, (Integer) borrowBooksInfo.get(0)); //BorrowID0
+                        preparedStatement.setString(2, (String) borrowBooksInfo.get(2));  //Title
+                        preparedStatement.setString(3, (String) borrowBooksInfo.get(3)); //Author
+                        preparedStatement.setDate(4, Date.valueOf((LocalDate) borrowBooksInfo.get(5))); //ReturnDate
+                        preparedStatement.setInt(5, studParcels.getStudentID()); //StudentID,
+                        preparedStatement.setInt(6, (Integer)borrowBooksInfo.get(1)); //BookID
+                        preparedStatement.setString(7, (String) borrowBooksInfo.get(4));//genre
+                        preparedStatement.setDate(8, Date.valueOf((sysDate))); //borrowedDate
+//                        read the query result code
                         int sqlStatus = preparedStatement.executeUpdate();
-                        String dbResponse = null;
+                        String serverMssg = null;
                         serverResponse response = new serverResponse();
                         //2. update the GUI with the results from the action performed with the student details and the book borrowed
                         if (sqlStatus >0){
-                            dbResponse = "Please proceed to the counter to collect your book. Enjoy have a great ";
+                            serverMssg = "Please proceed to the counter to collect your book. Enjoy have a great ";
                             response.setServerResponseFlag(sqlStatus);
-                            response.setMssgToDisplay(dbResponse);
+                            response.setMssgToDisplay(serverMssg);
                             objectOutputStream.writeObject(response);
-                            System.out.println(dbResponse+ " plus students parcel");
+//                            System.out.println(serverMssg+ "plus students parcel");
 ////                            update the count of the available book
 ////                            reduce the count by 1 after every borrow
 //                            String updateBooksCount = "SELECT Quantity FROM Books WHERE ISBN =?";
@@ -328,16 +329,14 @@ public class threadHandler implements  Runnable {
 //
 //                                 String updateCount = " "
 //                             }
-
-
                         }
                         else{
-                            dbResponse = "Something wong !!! try again";
+                            serverMssg = "Something wong !!! try again";
 //                            set the server response parcels to send back to the GUI
                             response.setServerResponseFlag(sqlStatus);
-                            response.setMssgToDisplay(dbResponse);
+                            response.setMssgToDisplay(serverMssg);
                             objectOutputStream.writeObject(response);
-                            System.out.println(dbResponse);
+                            System.out.println(serverMssg);
                         }
                     }
                     //2a. create the SQL query to insert into the borrow table with the user and books information
@@ -428,7 +427,7 @@ public class threadHandler implements  Runnable {
 //                  1b. search and collect the details of the books a student has borrowed
                     try(Connection connection = sqlConn.getConnected()){
                         System.out.println("Connected to the SQL database");
-                        String SQLquery = "SELECT Borrow.BorrowID, Borrow.Title, Borrow.Author FROM Borrow INNER JOIN Users ON Borrow.StudentID = Users.StudentID WHERE Borrow.StudentID = ?";
+                        String SQLquery = "SELECT Borrow.BorrowID, Borrow.Title, Borrow.Author, Borrow.BorrowedDate FROM Borrow INNER JOIN Users ON Borrow.StudentID = Users.StudentID WHERE Borrow.StudentID = ?";
 //                        1c. process the query
                         PreparedStatement preparedStatement = connection.prepareStatement(SQLquery);
                         preparedStatement.setInt(1,ID);
@@ -441,6 +440,7 @@ public class threadHandler implements  Runnable {
                             columns.add(borrowedBookList.getInt(1));
                             columns.add(borrowedBookList.getString(2));
                             columns.add(borrowedBookList.getString(3));
+                            columns.add((borrowedBookList.getDate(4)));
                             tabledata.add(columns);
                         }
                         List<String>cols = new ArrayList<>(Arrays.asList(BorroweMenuTablecols));
@@ -596,6 +596,42 @@ public class threadHandler implements  Runnable {
                     System.out.println(salt);
 
                 }
+                else if (objParsing.getCommands() == clientMssg.clientCommands.VIEWALLBOOKS){
+//                    steps
+//                    1. connect to the SQL server
+                    try(Connection connection = sqlConn.getConnected()){
+                        System.out.println("Connected to the DB");
+                        String command = returnAllBooks();
+                        PreparedStatement preparedStatement = connection.prepareStatement(command);
+                        ResultSet resultSet = preparedStatement.executeQuery();
+                        List<List<Object>> booksResult = new ArrayList<>();
+                        while (resultSet.next()){
+                            List<Object> tableCols = new ArrayList<>();
+                            tableCols.add(resultSet.getInt(1)); //bookid
+                            tableCols.add(resultSet.getString(2));//title
+                            tableCols.add(resultSet.getString(3));//author
+                            tableCols.add(resultSet.getString(4));//genre
+                            booksResult.add(tableCols);
+                        }
+                        String SQLstatusUpdate;
+                        List<String>cols = new ArrayList<>(Arrays.asList(booksCols));
+                        if(!booksResult.isEmpty()){
+                            SQLstatusUpdate = "books available";
+                            TableResponseContainer responseContainer = new TableResponseContainer(cols, booksResult, SQLstatusUpdate);
+                            objectOutputStream.writeObject(responseContainer);
+                            System.out.println(cols);
+
+                        }
+                        else{
+                            SQLstatusUpdate = "no books available";
+                            TableResponseContainer responseContainer = new TableResponseContainer(SQLstatusUpdate);
+                            objectOutputStream.writeObject(responseContainer);
+                            System.out.println(SQLstatusUpdate);
+                        }
+
+
+                    }
+                }
 
             }
         }catch (IOException ex){
@@ -654,7 +690,10 @@ public class threadHandler implements  Runnable {
         return " SELECT * FROM Books WHERE Author = ?";
     }
     public String getbooksAllSQL(){
-        return " SELECT * FROM Books WHERE Author = ? AND Title = ?";
+        return " SELECT BookID, Title, Author, Genre FROM Books WHERE Author = ? AND Title = ?";
+    }
+    public String returnAllBooks(){
+        return "SELECT BookID, Title, Author, Genre  FROM Books";
     }
     public static String saltGen() throws NoSuchAlgorithmException {
         SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
