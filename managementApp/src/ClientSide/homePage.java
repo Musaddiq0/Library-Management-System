@@ -58,9 +58,7 @@ public class homePage  extends JFrame{
              */
             @Override
             public void actionPerformed(ActionEvent e) {
-                ReturnPanel.setVisible(true);
-                homepageButtonsPanel.setVisible(false);
-                showBorrowedBooks(student);
+                showReturnPage(student);
             }
         });
         returnButton.addActionListener(new ActionListener() {
@@ -91,6 +89,13 @@ public class homePage  extends JFrame{
 
             }
         });
+    }
+
+    private void showReturnPage(Student curStudent){
+        ReturnPage returnPage= new ReturnPage(curStudent);
+        returnPage.connectionMssg.setText("Connection to the server established");
+        this.setVisible(false);
+
     }
 
     private synchronized void showBorrowedBooks(Student student) {

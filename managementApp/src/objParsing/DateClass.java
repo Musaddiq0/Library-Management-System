@@ -1,12 +1,11 @@
 package objParsing;
 import java.time.LocalDate;
-import java.util.Date;
 
-public class DateFieldExample {
+public class DateClass {
     private String name;
     private LocalDate eventDate;
 
-    public DateFieldExample(String name, LocalDate eventDate) {
+    public DateClass(String name, LocalDate eventDate) {
         this.name = name;
         this.eventDate = eventDate;
     }

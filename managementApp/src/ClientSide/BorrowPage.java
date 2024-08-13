@@ -1,6 +1,7 @@
 package ClientSide;
 
 import objParsing.*;
+import objParsing.DateClass;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -38,6 +39,7 @@ public class BorrowPage extends JFrame {
     private ObjectInputStream objectInputStream;
     Student student;
     Random rand = new Random();
+
 /*
 
     /**
@@ -50,6 +52,7 @@ public class BorrowPage extends JFrame {
         reconnectToServer();
         this.student = student;
         this.setTitle("Welcome to the Library Application" + student.getFirstName());
+        booksTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         //      Button action listeners
         viewButton.addActionListener(new ActionListener() {
             @Override
@@ -123,11 +126,11 @@ public class BorrowPage extends JFrame {
                         userDate = LocalDate.parse(returnDate.getText().trim(), simpleDateFormat);
                         LocalDate localDate = LocalDate.now();
                         if(userDate.isAfter(localDate)) {
-                            DateFieldExample dateFieldExample = new DateFieldExample("Borrow Date",userDate);
+                            DateClass dateClass = new DateClass("Borrow Date",userDate);
                             userBorrowData.add(userDate);
 //                            student.setBorrowDate(userDate);
 //                            student.setBorrowBooksRequest(userBorrowData);
-                            borrowBook(userBorrowData,dateFieldExample);
+                            borrowBook(userBorrowData, dateClass);
                         }
 
                     } catch (DateTimeException ex) {
@@ -173,6 +176,7 @@ public class BorrowPage extends JFrame {
                 }
             }
         });
+
         homePageButton.addActionListener(new ActionListener() {
             /**
              * @param e the event to be processed
@@ -298,7 +302,7 @@ public class BorrowPage extends JFrame {
      *
      * @param userInput this is used to pass the  signed-in users input (i.e the input required to for borrowing the book)to the server
      **/
-    public void borrowBook(List<Object> userInput, DateFieldExample borrowdate) {
+    public void borrowBook(List<Object> userInput, DateClass borrowdate) {
 //        Steps
 //        1a. sort out the user input (i.e. the books information and the date of  return)
         if (objectInputStream != null && objectOutputStream != null) {
@@ -452,8 +456,6 @@ public class BorrowPage extends JFrame {
         }
     }
 
-//    public
-
     public void reconnectToServer() {
         endConnection();
         borrowMainStatusLb.setText("Status: Attempting connection to server");
@@ -469,28 +471,9 @@ public class BorrowPage extends JFrame {
         }
     }
 
-    /**
-     * This gets the data the user entered on the GUI and process the information to send to the server.
-     *
-     * @param borrowDate the entered user data in this format yyyy/mm/dd
-     **/
 
-//    public Date getDate(String borrowDate) {
-////        variable is a Date expected to return a Date
-//        Date convertdate = new Date();
-////        create a date format and set the pattern of the date
-//        SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd");
-////        convert the string from the GUI to a date in a try/catch block
-//        try {
-//            convertdate = format.parse(borrowDate);
-//            // Print the date to the console
-//            System.out.println("Parsed date: " + convertdate.toString());
-//            return convertdate;
-//        } catch (ParseException ex) {
-//            // If parsing fails, print an error message to the console
-//            return convertdate;
-//        }
-//    }
+
+
 
 }
 
