@@ -457,9 +457,6 @@ public class threadHandler implements  Runnable {
                             responseContainer.setStatus("Contains no Borrowed Books");
                             objectOutputStream.writeObject(responseContainer);
                         }
-
-
-
                     }
 
                 }

@@ -153,10 +153,10 @@ public class UserInterface  extends JFrame {
                     });
                     passWord = passWR.getPassword();
                     if(validatePassword(Arrays.toString(passWord))){
-                        String stdID = studentIdVal.getText();
+                        int stdID = Integer.parseInt(studentIdVal.getText());
                         String firstName = fnVal.getText();
                         String lastName = lnVal.getText();
-                        Student newStudent = new Student(Integer.parseInt(stdID),firstName,lastName);
+                        Student newStudent = new Student(stdID,firstName,lastName);
                         newStudent.setPassword(Arrays.toString(passWord));
                         createUser(newStudent);
 
@@ -226,11 +226,19 @@ public class UserInterface  extends JFrame {
                 reply = (serverResponse) objectInputStream.readObject();
                 int loginStat = reply.getServerResponseFlag();
                 if (loginStat<=0){
+                    studentIdVal.setText("");
+                    fnVal.setText("");
+                    lnVal.setText("");
+                    passWR.setText("");
                     JOptionPane.showMessageDialog(mainPanel, "Please try again");
                     newStudent = null;
                 }
                 else{
 //                    statusLabel.setText(reply.getStatusMssg());
+                    studentIdVal.setText("");
+                    fnVal.setText("");
+                    lnVal.setText("");
+                    passWR.setText("");
                     JOptionPane.showMessageDialog(mainPanel, reply.getMssgToDisplay());
 
                 }

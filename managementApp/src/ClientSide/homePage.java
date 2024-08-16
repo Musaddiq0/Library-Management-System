@@ -91,6 +91,7 @@ public class homePage  extends JFrame{
     }
 
     private void showReturnPage(Student curStudent){
+        this.dispose();
         ReturnPage returnPage= new ReturnPage(curStudent);
         returnPage.connectionMssg.setText("Connection to the server established");
 //        this.setVisible(false);

@@ -33,7 +33,6 @@ public class BorrowPage extends JFrame {
     private JPanel viewBooksPanel;
     private JPanel tablePanel;
     private JButton viewAllButton;
-    private JButton viewAllBooksButton;
     private Socket socket;
     private ObjectOutputStream objectOutputStream;
     private ObjectInputStream objectInputStream;
@@ -177,29 +176,9 @@ public class BorrowPage extends JFrame {
             }
         });
 
-        homePageButton.addActionListener(new ActionListener() {
-            /**
-             * @param e the event to be processed
-             */
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showHomepage(student);
-            }
-        });
+        homePageButton.addActionListener(e -> showHomepage(student));
 
-        viewAllButton.addActionListener(new ActionListener() {
-            /**
-             * @param e the event to be processed
-             */
-            @Override
-            public void actionPerformed(ActionEvent e) {
-//                steps
-//                1.no input to expect from user
-//                2. call viewallbooks methods
-                showAllBooks(student);
-
-            }
-        });
+        viewAllButton.addActionListener(e -> showAllBooks(student));
     }
 
     public void initBorrowPage() {
@@ -311,8 +290,10 @@ public class BorrowPage extends JFrame {
             try {
                 clientMssg clientMssg = new clientMssg(objParsing.clientMssg.clientCommands.BORROWBOOK);
                 clientMssg.setBooksSelected(userInput);
+                student.setBorrowDate(borrowdate.getEventDate());
                 clientMssg.setStudParcels(student);
                 objectOutputStream.writeObject(clientMssg);
+                objectOutputStream.writeObject(student);
             } catch (IOException e) {
                 borrowMainStatusLb.setText("IOException " + e);
             }
@@ -437,9 +418,8 @@ public class BorrowPage extends JFrame {
     }
 
     public void showHomepage(Student signedStudent) {
+        this.dispose();
         homePage homePage = new homePage(signedStudent);
-        this.setVisible(false);
-        homePage.setVisible(true);
     }
 
     private void endConnection() {
